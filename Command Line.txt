@@ -1,0 +1,7 @@
+python combined_adoption_report.py 
+--github-json github_copilot_metrics_november.json 
+--workbench-json api_usage_permodel_stats.json 
+--workbench-questions-csv "Workbench User Details - Nov Dec.csv"
+--month 2025-11 
+--csv-output november_adoption.csv 
+--html-output november_adoption.html

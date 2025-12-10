@@ -1,0 +1,8 @@
+# Python dependencies for AI Usage Report Trial project
+# Currently using only Python standard library modules
+# Add external packages here as needed
+
+# Example (uncomment if needed):
+# pandas>=2.0.0
+# numpy>=1.24.0
+
