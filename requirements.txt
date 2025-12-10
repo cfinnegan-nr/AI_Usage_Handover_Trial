@@ -6,3 +6,5 @@
 # pandas>=2.0.0
 # numpy>=1.24.0
 
+# Plotly for interactive HTML visualizations
+plotly>=5.18.0

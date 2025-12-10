@@ -1,0 +1,189 @@
+# CSV Data Generation Guidelines
+
+> **Cursor IDE Rules File**  
+> This file defines CSV generation standards for AI adoption reports. These guidelines are automatically applied when generating CSV reports in Cursor IDE.
+
+## File Structure
+
+### Encoding and Format
+- Use UTF-8 encoding for all CSV files
+- Use `newline=''` parameter when opening CSV files for writing (prevents extra blank lines on Windows)
+- Use `csv.writer` from Python's `csv` module (not manual string formatting)
+
+### Section Organization
+CSV reports should be organized into distinct sections separated by empty rows:
+
+1. **ADOPTION SUMMARY STATISTICS** - Overall metrics
+2. **AGENTIC CONSISTENCY METRICS** - Consistency based on days_active
+3. **CONSISTENCY METRICS** - Consistency based on max(days_active, wb_days_active)
+4. **INTENSITY METRICS** - Usage intensity statistics
+5. **PLATFORM USAGE** - Platform-specific user counts
+6. **PER-USER ADOPTION STATISTICS** - Detailed user-level data
+
+## Section Formatting Rules
+
+### Summary Sections
+- Each section starts with a section title row (all caps, descriptive)
+- Follow with a header row: `['Metric', 'Value']`
+- Each metric on its own row: `['Metric Name', metric_value]`
+- Separate sections with empty rows (`writer.writerow([])`)
+
+### Per-User Data Section
+- Section title: `['PER-USER ADOPTION STATISTICS']`
+- Header row with all column names
+- One row per user with corresponding data values
+- Sort users by: max(days_active, wb_days_active) descending, then days_active descending, then total requests descending
+
+## Column Definitions and Data Types
+
+### Summary Metrics Columns
+- **Report Period**: String format `"YYYY-MM-DD to YYYY-MM-DD"`
+- **Business Days in Period**: Integer (no decimals)
+- **Total Users**: Integer
+- **Monthly Active Users (MAU)**: Integer
+- **Adoption Rate (%)**: Float rounded to 1 decimal place
+- **Consistency Rates (%)**: Float rounded to 1 decimal place
+- **Request Counts**: Integer (no decimals, no thousands separators in CSV)
+- **Spend/Currency**: Float rounded to 2 decimal places
+
+### Per-User Columns (in order)
+1. **Email**: String (lowercase normalized)
+2. **Chapter**: String (from metadata, may be empty)
+3. **Current Squad**: String (from metadata, may be empty)
+4. **GitHub Login**: String (may be empty)
+5. **Days Active**: Integer (API/GH combined active days)
+6. **WB Days Active**: Integer (calculated from workbench questions)
+7. **Workbench Questions**: Integer
+8. **API Normal**: Integer (non-embedding API requests)
+9. **GitHub Requests**: Integer (adjusted: max(days_active, actual_requests))
+10. **GH Acceptance Rate (%)**: Float rounded to 1 decimal place
+11. **GH LOC Added**: Integer (lines of code added)
+12. **GH LOC Deleted**: Integer (lines of code deleted)
+13. **GitHub Agent**: String ("Yes" or "No")
+14. **GitHub via Roo**: String ("Yes" or "No")
+15. **API Embedding**: Integer (embedding/indexing requests)
+16. **Prompt Caching**: String ("Yes" or "No")
+17. **Total Spend**: Float rounded to 2 decimal places
+18. **Models Breakdown**: String (comma-separated "model: count" pairs, sorted by count descending)
+19. **GH Features Breakdown**: String (comma-separated "feature: count" pairs, sorted by count descending)
+
+## Data Formatting Rules
+
+### Numeric Values
+- **Integers**: Write as-is, no formatting (no commas, no decimals)
+- **Percentages**: Round to 1 decimal place (e.g., `45.7`)
+- **Currency/Spend**: Round to 2 decimal places (e.g., `1234.56`)
+- **Consistency Rates**: Round to 1 decimal place, capped at 100.0
+- **Request Averages**: Round to 2 decimal places
+
+### Boolean Values
+- Convert all boolean values to "Yes" or "No" strings
+- Use: `'Yes' if condition else 'No'`
+- Apply to: GitHub Agent, GitHub via Roo, Prompt Caching
+
+### String Values
+- **Email addresses**: Always lowercase, trimmed
+- **Empty strings**: Use empty string `''` (not `None` or `'N/A'`)
+- **Breakdown strings**: Format as `"item1: count1, item2: count2"` sorted by count descending
+- **Missing values**: Use empty string for missing metadata (chapter, squad, github_login)
+
+### Date/Time Values
+- **Report Period**: Format as `"YYYY-MM-DD to YYYY-MM-DD"`
+- **Dates**: Use ISO format `YYYY-MM-DD` when dates appear as values
+
+## Section-Specific Rules
+
+### ADOPTION SUMMARY STATISTICS
+- Include: Report Period, Business Days, Total Users, MAU, Adoption Rate
+- Format percentages with `(%)` suffix in metric name
+
+### AGENTIC CONSISTENCY METRICS
+- Based on `days_active` only
+- Include: Median, Mean, 75th Percentile, Users with 65% Active Days
+- Format: `"{count} ({percentage}%)"` for threshold metrics
+
+### CONSISTENCY METRICS
+- Based on `max(days_active, wb_days_active)`
+- Same structure as Agentic Consistency Metrics
+- Prefix metric names with "WB" in code, but display as "CONSISTENCY METRICS" in CSV
+
+### INTENSITY METRICS
+- Include: Total Requests, Mean/Median/P75 per User, Workbench Questions totals and averages
+- Include: GitHub Acceptance Rate, LOC metrics (Added, Deleted, Net)
+- All request counts exclude embedding requests
+
+### PLATFORM USAGE
+- Count distinct users by platform/feature
+- Include: GitHub Copilot Users, API Users, Both Platforms, Agent Users, Embedding Users, Prompt Caching Users, Workbench Questions Users
+
+### PER-USER STATISTICS
+- Include ALL users from ALLOWED_EMAILS list (even with zero activity)
+- Sort by: max(days_active, wb_days_active) descending, then days_active descending, then total requests descending
+- Use `.get()` with defaults for optional fields (e.g., `wb_days_active` defaults to 0)
+
+## Error Handling
+
+### Missing Data
+- Use empty string `''` for missing string values
+- Use `0` for missing numeric values
+- Use `.get(key, default)` pattern for optional dictionary keys
+
+### Data Validation
+- Validate that required fields exist before writing
+- Handle None values explicitly (convert to appropriate defaults)
+- Ensure all users from ALLOWED_EMAILS are included (even with zero activity)
+
+## Code Patterns
+
+### CSV Writer Setup
+```python
+with open(output_path, 'w', newline='', encoding='utf-8') as csvfile:
+    writer = csv.writer(csvfile)
+```
+
+### Section Header Pattern
+```python
+writer.writerow(['SECTION TITLE'])
+writer.writerow(['Metric', 'Value'])  # If key-value format
+# OR
+writer.writerow(['Column1', 'Column2', ...])  # If table format
+```
+
+### Empty Row Separator
+```python
+writer.writerow([])  # Single empty row between sections
+```
+
+### Boolean Conversion Pattern
+```python
+'Yes' if user['boolean_field'] else 'No'
+```
+
+### Percentage Formatting Pattern
+```python
+round(value, 1)  # For percentages
+round(value, 2)  # For currency/averages
+```
+
+### Breakdown String Pattern
+```python
+', '.join(f"{item}: {count}" for item, count in sorted(items.items(), key=lambda x: x[1], reverse=True))
+```
+
+## Best Practices
+
+1. **Consistency**: Use the same formatting rules across all sections
+2. **Readability**: Use descriptive section titles and column names
+3. **Completeness**: Include all users from the allowed list, even with zero activity
+4. **Precision**: Round appropriately based on data type (1 decimal for percentages, 2 for currency)
+5. **Sorting**: Always sort per-user data by relevance (activity first, then intensity)
+6. **Validation**: Validate data exists before writing to avoid errors
+7. **Documentation**: Include clear section headers to make CSV self-documenting
+
+## Notes
+
+- CSV files are intended for programmatic consumption and Excel import
+- Avoid HTML entities or special formatting in CSV (save that for HTML reports)
+- Keep column names concise but descriptive
+- Maintain consistent ordering of columns across reports
+- Use standard CSV escaping (handled automatically by `csv.writer`)

@@ -1,0 +1,79 @@
+---
+alwaysApply: true
+---
+
+# Python Code Guidelines
+
+> **Cursor IDE Rules File**  
+> This file defines Python coding standards for this project. These guidelines are automatically applied when working with Python code in Cursor IDE.
+
+## Style/Formatting
+
+- Follow PEP 8; keep lines ≤ 100 chars; prefer single quotes unless readability suffers.
+- Use Black (or equivalent) formatting; run isort for deterministic imports (stdlib, third-party, local).
+- Avoid magic numbers/strings; lift to named constants.
+
+## Typing
+
+- Default to type hints everywhere (functions, class attrs); prefer `typing` over runtime checks when possible.
+- Use `TypedDict`/`Protocol`/`dataclass` for structured data instead of bare dicts/tuples.
+- For optionals, handle `None` explicitly; avoid `Any` unless unavoidable—document why.
+
+## Imports/Modules
+
+- Keep modules focused; avoid large grab-bag files.
+- Relative imports only within the same package layer; use absolute imports otherwise.
+- Do not import inside functions unless needed to break cycles or reduce startup cost; comment when you do.
+
+## Functions/Classes
+
+- Favor small, single-purpose functions; avoid deep parameter lists—group with dataclasses or configs.
+- Make side effects explicit; avoid hidden global state and mutation of args.
+- Prefer dataclasses over bare classes for data containers; make immutability explicit where helpful (`frozen=True`).
+
+## Error Handling
+
+- Fail fast with clear messages; catch only what you can handle meaningfully.
+- Log the context with structured data (not just the exception string).
+- Use custom exceptions to express domain errors; avoid blanket `except Exception`.
+
+## Logging/Observability
+
+- Use the standard `logging` module; avoid print for runtime info.
+- Include identifiers (user id, resource id) sparingly and without PII; avoid logging secrets.
+- Prefer structured logging payloads over string concatenation.
+
+## Testing
+
+- Write tests for new behavior and bug fixes; prefer pytest style.
+- Keep tests deterministic; avoid real network/file-system unless explicitly integration tests.
+- Use fixtures/fakes over mocks where feasible; assert behaviors, not implementation details.
+
+## Data/IO
+
+- Validate external inputs early; normalize data at boundaries.
+- Use context managers for files/resources; close handles promptly.
+- For CSV/JSON handling, pin field names; avoid brittle positional access.
+
+## Performance/Concurrency
+
+- Profile before optimizing; measure with realistic data sizes.
+- Avoid unnecessary work in hot paths; prefer generators/streaming for large datasets.
+- Use `async` only when IO-bound and infrastructure supports it; avoid mixing threading and async without care.
+
+## Security/Secrets
+
+- Never hardcode secrets or tokens; use environment or secret managers.
+- Sanitize/escape user-provided data before interpolation into queries or logs.
+- Keep dependencies up to date; pin versions and watch for CVEs.
+
+## Documentation
+
+- Add docstrings for public functions/classes; describe params, return types, and error cases.
+- Keep README or module-level docs updated when behavior/CLI changes.
+- Favor examples over prose when showing usage.
+
+## CLI/Scripts
+
+- Provide `--help` with argparse/typer; validate arguments.
+- Return proper exit codes; avoid silent failures.
