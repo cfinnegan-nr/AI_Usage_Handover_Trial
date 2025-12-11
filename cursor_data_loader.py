@@ -290,6 +290,39 @@ def load_user_leaderboard(csv_path: str, allowed_emails: Set[str]) -> Dict[str, 
         return {}
 
 
+def load_fs_repo_list(csv_path: str) -> Set[str]:
+    """Load repository names from FS_Repo_List.csv.
+    
+    Args:
+        csv_path: Path to FS_Repo_List.csv
+        
+    Returns:
+        Set of repository names (normalized to lowercase for comparison)
+    """
+    print(f"Loading FS repository list from {csv_path}...")
+    
+    repo_names = set()
+    
+    try:
+        with open(csv_path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row_num, row in enumerate(reader, 1):
+                repo_name = row.get('Repo Name', '').strip()
+                if repo_name:
+                    repo_names.add(repo_name.lower())
+        print(f"Loaded {len(repo_names)} repository names from FS_Repo_List.csv")
+        return repo_names
+        
+    except FileNotFoundError:
+        print(f"Warning: File '{csv_path}' not found. FS repo list will be empty.")
+        return set()
+    except Exception as e:
+        print(f"Warning: Error loading FS_Repo_List.csv: {e}")
+        import traceback
+        traceback.print_exc()
+        return set()
+
+
 def load_repository_analytics(csv_path: str) -> List[Dict[str, Any]]:
     """Load cursor_Team_Repository_Analytics.csv.
     

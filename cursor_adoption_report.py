@@ -20,6 +20,7 @@ from cursor_data_loader import (
     load_usage_events,
     load_user_leaderboard,
     load_repository_analytics,
+    load_fs_repo_list,
     merge_cursor_user_data
 )
 from cursor_metrics_calculator import calculate_master_metrics, calculate_chapter_breakdown
@@ -137,6 +138,11 @@ def main():
         print("\nStep 5: Loading repository analytics...")
         repo_analytics = load_repository_analytics(repo_analytics_path)
         
+        # Step 5b: Load FS repository list
+        print("\nStep 5b: Loading FS repository list...")
+        fs_repo_list_path = os.path.join(cursor_data_dir, 'FS_Repo_List.csv')
+        fs_repo_names = load_fs_repo_list(fs_repo_list_path)
+        
         # Step 6: Merge user data
         print("\nStep 6: Merging user data...")
         merged_users = merge_cursor_user_data(
@@ -147,19 +153,26 @@ def main():
         print("\nStep 7: Calculating master metrics...")
         master_metrics = calculate_master_metrics(merged_users, date_range)
         
-        # Step 8: Generate CSV reports
-        print("\nStep 8: Generating CSV reports...")
-        generate_individual_report(merged_users, 'cursor_individual_adoption_report.csv')
+        # Step 8: Create output directory
+        print("\nStep 8: Creating output directory...")
+        output_dir = 'Cursor_Output'
+        os.makedirs(output_dir, exist_ok=True)
+        print(f"Output directory: {output_dir}")
+        
+        # Step 9: Generate CSV reports
+        print("\nStep 9: Generating CSV reports...")
+        generate_individual_report(merged_users, os.path.join(output_dir, 'cursor_individual_adoption_report.csv'))
         generate_master_report(
             merged_users, repo_analytics, master_metrics, date_range,
-            'cursor_master_adoption_report.csv'
+            os.path.join(output_dir, 'cursor_master_adoption_report.csv')
         )
         
-        # Step 9: Generate HTML report
-        print("\nStep 9: Generating HTML report...")
+        # Step 10: Generate HTML report
+        print("\nStep 10: Generating HTML report...")
         generate_html_report(
             merged_users, master_metrics, repo_analytics, date_range,
-            'cursor_adoption_report.html'
+            os.path.join(output_dir, 'cursor_adoption_report.html'),
+            fs_repo_names
         )
         
         # Summary
@@ -170,7 +183,7 @@ def main():
         print(f"Total Users: {master_metrics['total_users']}")
         print(f"Active Users: {master_metrics['active_users']}")
         print(f"Adoption Rate: {master_metrics['adoption_rate']}%")
-        print(f"\nGenerated Files:")
+        print(f"\nGenerated Files (in {output_dir}/):")
         print(f"  - cursor_individual_adoption_report.csv")
         print(f"  - cursor_master_adoption_report.csv")
         print(f"  - cursor_adoption_report.html")

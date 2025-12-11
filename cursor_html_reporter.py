@@ -8,7 +8,7 @@ for Cursor AI adoption metrics.
 
 import json
 from datetime import datetime
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional, Set
 from collections import defaultdict
 import plotly.graph_objects as go
 
@@ -17,7 +17,8 @@ def generate_html_report(merged_users: List[Dict[str, Any]],
                        master_metrics: Dict[str, Any], 
                        repo_analytics: List[Dict[str, Any]], 
                        date_range: Tuple[Any, Any], 
-                       output_path: str) -> None:
+                       output_path: str,
+                       fs_repo_names: Optional[Set[str]] = None) -> None:
     """Generate comprehensive HTML report with Plotly visualizations.
     
     Args:
@@ -33,7 +34,7 @@ def generate_html_report(merged_users: List[Dict[str, Any]],
     report_period = master_metrics['report_period']
     
     # Generate Plotly charts
-    charts_html = generate_plotly_charts(merged_users, master_metrics, repo_analytics)
+    charts_html = generate_plotly_charts(merged_users, master_metrics, repo_analytics, fs_repo_names)
     
     # Generate table HTML
     table_html = generate_table_html(merged_users)
@@ -507,7 +508,8 @@ def generate_html_report(merged_users: List[Dict[str, Any]],
 
 def generate_plotly_charts(merged_users: List[Dict[str, Any]], 
                           master_metrics: Dict[str, Any], 
-                          repo_analytics: List[Dict[str, Any]]) -> str:
+                          repo_analytics: List[Dict[str, Any]],
+                          fs_repo_names: Optional[Set[str]] = None) -> str:
     """Generate Plotly chart HTML code.
     
     Args:
@@ -709,16 +711,38 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
         </script>
 """
     
-    # 7. AI Impact Percentage for Hub Repos - Breakdown by Individual Repos
+    # 7. AI Impact Percentage for Hub Repos and FS Repos - Breakdown by Individual Repos
+    # Get repos with 'hub' in name
     hub_repos = [repo for repo in repo_analytics if 'hub' in repo.get('repo_name', '').lower()]
     
-    if hub_repos:
+    # Get repos from FS_Repo_List.csv
+    fs_repos = []
+    if fs_repo_names:
+        for repo in repo_analytics:
+            repo_name_lower = repo.get('repo_name', '').lower()
+            if repo_name_lower in fs_repo_names:
+                fs_repos.append(repo)
+    
+    # Combine both lists, avoiding duplicates
+    combined_repos = {}
+    for repo in hub_repos + fs_repos:
+        repo_name = repo.get('repo_name', '')
+        if repo_name not in combined_repos:
+            combined_repos[repo_name] = repo
+    
+    # Filter out repos with 0% AI Impact Percentage
+    filtered_repos = [
+        repo for repo in combined_repos.values()
+        if repo.get('ai_impact_percentage', 0) > 0
+    ]
+    
+    if filtered_repos:
         # Sort repos by AI Impact Percentage (descending) for better visualization
-        hub_repos_sorted = sorted(hub_repos, key=lambda r: r.get('ai_impact_percentage', 0), reverse=True)
+        filtered_repos_sorted = sorted(filtered_repos, key=lambda r: r.get('ai_impact_percentage', 0), reverse=True)
         
         # Extract repo names and AI Impact Percentages
-        repo_names = [repo.get('repo_name', 'Unknown') for repo in hub_repos_sorted]
-        repo_percentages = [repo.get('ai_impact_percentage', 0) for repo in hub_repos_sorted]
+        repo_names = [repo.get('repo_name', 'Unknown') for repo in filtered_repos_sorted]
+        repo_percentages = [repo.get('ai_impact_percentage', 0) for repo in filtered_repos_sorted]
         
         # Individual repo breakdown chart
         fig10 = go.Figure(data=[go.Bar(x=repo_percentages, y=repo_names, orientation='h',
@@ -727,7 +751,7 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
                                        text=[f'{p:.2f}%' for p in repo_percentages],
                                        textposition='auto')])
         fig10.update_layout(
-            title='AI Impact Percentage - Hub Repositories (By Individual Repo)',
+            title='AI Impact Percentage - Hub & FS Repositories (By Individual Repo)',
             xaxis_title='AI Impact Percentage (%)',
             yaxis_title='Repository',
             template='plotly_white',
@@ -738,7 +762,7 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
         chart10_layout = json.dumps(fig10_dict['layout'])
         charts_html += f"""
             <div class="chart-container">
-                <div class="chart-title">AI Impact Percentage - Hub Repositories (By Individual Repo)</div>
+                <div class="chart-title">AI Impact Percentage - Hub & FS Repositories (By Individual Repo)</div>
                 <div id="chart10"></div>
             </div>
             <script>
