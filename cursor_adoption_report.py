@@ -11,7 +11,7 @@ Usage:
 
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, date
 from typing import Tuple, Optional
 
 # Import our modules
@@ -21,14 +21,15 @@ from cursor_data_loader import (
     load_user_leaderboard,
     load_repository_analytics,
     load_fs_repo_list,
-    merge_cursor_user_data
+    merge_cursor_user_data,
+    find_newest_file_by_pattern
 )
 from cursor_metrics_calculator import calculate_master_metrics, calculate_chapter_breakdown
 from cursor_csv_reporter import generate_individual_report, generate_master_report
 from cursor_html_reporter import generate_html_report
 
 
-def extract_date_range_from_events(csv_path: str) -> Optional[Tuple[datetime, datetime]]:
+def extract_date_range_from_events(csv_path: str) -> Optional[Tuple[date, date]]:
     """Extract date range from cursor_team_usage_events.csv.
     
     Args:
@@ -85,28 +86,45 @@ def main():
     print("="*60)
     print()
     
-    # Define file paths
+    # Define file paths using flexible pattern matching
     cursor_data_dir = 'Cursor_Data'
-    usage_events_path = os.path.join(cursor_data_dir, 'cursor_team_usage_events.csv')
-    leaderboard_path = os.path.join(cursor_data_dir, 'cursor_User_Leaderboard.csv')
-    repo_analytics_path = os.path.join(cursor_data_dir, 'cursor_Team_Repository_Analytics.csv')
+    
+    # Find files by pattern (newest matching file)
+    print("\nLocating input files...")
+    usage_events_path = find_newest_file_by_pattern(cursor_data_dir, 'usage-event')
+    leaderboard_path = find_newest_file_by_pattern(cursor_data_dir, 'User_Leaderboard')
+    repo_analytics_path = find_newest_file_by_pattern(cursor_data_dir, 'Team_Repository_Analytics')
     
     # Check if files exist
     missing_files = []
-    for path, name in [
-        (usage_events_path, 'cursor_team_usage_events.csv'),
-        (leaderboard_path, 'cursor_User_Leaderboard.csv'),
-        (repo_analytics_path, 'cursor_Team_Repository_Analytics.csv'),
-        ('useremails.csv', 'useremails.csv'),
-    ]:
-        if not os.path.exists(path):
-            missing_files.append(name)
+    if not usage_events_path:
+        missing_files.append('team_usage_event (CSV file)')
+    else:
+        print(f"  Found usage events file: {os.path.basename(usage_events_path)}")
+    
+    if not leaderboard_path:
+        missing_files.append('User_Leaderboard (CSV file)')
+    else:
+        print(f"  Found leaderboard file: {os.path.basename(leaderboard_path)}")
+    
+    if not repo_analytics_path:
+        missing_files.append('Team_Repository_Analytics (CSV file)')
+    else:
+        print(f"  Found repository analytics file: {os.path.basename(repo_analytics_path)}")
+    
+    if not os.path.exists('useremails.csv'):
+        missing_files.append('useremails.csv')
     
     if missing_files:
-        print("Error: The following required files are missing:")
+        print("\nError: The following required files are missing:")
         for f in missing_files:
             print(f"  - {f}")
         return 1
+    
+    # Type assertions: at this point, files must exist (checked above)
+    assert usage_events_path is not None, "usage_events_path should be set"
+    assert leaderboard_path is not None, "leaderboard_path should be set"
+    assert repo_analytics_path is not None, "repo_analytics_path should be set"
     
     try:
         # Step 1: Load allowed emails and metadata
@@ -123,8 +141,9 @@ def main():
         
         if not date_range:
             print("Warning: Could not extract date range. Using all available data.")
-            # Use a default range if we can't extract it
-            date_range = (datetime(2025, 1, 1).date(), datetime(2025, 12, 31).date())
+            # Use a very wide range that won't filter out any data
+            # This ensures all events are included regardless of when the code runs
+            date_range = (date(2000, 1, 1), date(2099, 12, 31))
         
         # Step 3: Load usage events
         print("\nStep 3: Loading usage events...")

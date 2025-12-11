@@ -8,9 +8,41 @@ It filters data by allowed emails from useremails.csv and aggregates metrics per
 
 import csv
 import os
-from datetime import datetime
+from datetime import datetime, date
 from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Any, Optional
+
+
+def find_newest_file_by_pattern(directory: str, pattern: str) -> Optional[str]:
+    """Find the newest file in a directory that contains a pattern in its name.
+    
+    Args:
+        directory: Directory path to search in
+        pattern: Text pattern to search for in filename (case-insensitive)
+        
+    Returns:
+        Path to the newest matching file, or None if no file found
+    """
+    if not os.path.exists(directory) or not os.path.isdir(directory):
+        return None
+    
+    matching_files = []
+    pattern_lower = pattern.lower()
+    
+    try:
+        for filename in os.listdir(directory):
+            file_path = os.path.join(directory, filename)
+            if os.path.isfile(file_path) and filename.lower().endswith('.csv'):
+                if pattern_lower in filename.lower():
+                    matching_files.append(file_path)
+    except OSError:
+        return None
+    
+    if not matching_files:
+        return None
+    
+    # Return the file with the most recent modification time
+    return max(matching_files, key=lambda f: os.path.getmtime(f))
 
 
 def load_allowed_emails_and_metadata() -> Tuple[Set[str], Dict[str, Dict[str, str]]]:
@@ -52,15 +84,9 @@ def load_allowed_emails_and_metadata() -> Tuple[Set[str], Dict[str, Dict[str, st
     
     # Load emails from User_Leaderboard file
     try:
-        # Find User_Leaderboard file
-        leaderboard_path = None
-        for root, dirs, files in os.walk('.'):
-            for file in files:
-                if 'User_Leaderboard' in file and file.endswith('.csv'):
-                    leaderboard_path = os.path.join(root, file)
-                    break
-            if leaderboard_path:
-                break
+        # Find User_Leaderboard file in Cursor_Data directory (newest matching file)
+        cursor_data_dir = 'Cursor_Data'
+        leaderboard_path = find_newest_file_by_pattern(cursor_data_dir, 'User_Leaderboard')
         
         if leaderboard_path and os.path.exists(leaderboard_path):
             with open(leaderboard_path, 'r', encoding='utf-8-sig') as f:
@@ -96,7 +122,7 @@ def load_allowed_emails_and_metadata() -> Tuple[Set[str], Dict[str, Dict[str, st
 
 
 def load_usage_events(csv_path: str, allowed_emails: Set[str], 
-                      date_range: Optional[Tuple[datetime, datetime]] = None) -> Dict[str, Dict[str, Any]]:
+                      date_range: Optional[Tuple[date, date]] = None) -> Dict[str, Dict[str, Any]]:
     """Load cursor_team_usage_events.csv and aggregate per user.
     
     Args:
