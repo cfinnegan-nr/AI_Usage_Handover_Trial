@@ -101,16 +101,24 @@ def calculate_chapter_breakdown(merged_users: List[Dict[str, Any]]) -> Dict[str,
     # Calculate threshold metrics for each chapter
     result = {}
     for chapter, data in chapter_data.items():
+        # Get the fixed threshold for the chapter (1000 for BE/FE, 400 for others)
         threshold = get_threshold_for_chapter(chapter)
         total_completions = data['total_agent_completions']
-        threshold_percentage = (total_completions / threshold * 100) if threshold > 0 else 0
+        active_users = data['active_users']
+        
+        # Calculate average completions per active user in the chapter
+        avg_completions = (total_completions / active_users) if active_users > 0 else 0
+        
+        # Compare average completions against the fixed threshold (not divided by users)
+        threshold_percentage = (avg_completions / threshold * 100) if threshold > 0 else 0
         
         result[chapter] = {
             **data,
-            'threshold': threshold,
+            'avg_agent_completions': round(avg_completions, 2),
+            'threshold': threshold,  # Fixed threshold: 1000 for BE/FE, 400 for others
             'threshold_percentage': round(threshold_percentage, 1),
-            'threshold_gap': total_completions - threshold,
-            'meets_threshold': total_completions >= threshold,
+            'threshold_gap': round(avg_completions - threshold, 2),
+            'meets_threshold': avg_completions >= threshold,
         }
     
     return result

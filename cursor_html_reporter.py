@@ -291,7 +291,7 @@ def generate_html_report(merged_users: List[Dict[str, Any]],
                     <div class="stat-number" style="color: {threshold_color};">{threshold_status}</div>
                     <div class="stat-label"><strong>{chapter}</strong></div>
                     <div class="stat-label">Users: {data['active_users']}/{data['total_users']}</div>
-                    <div class="stat-label">Completions: {data['total_agent_completions']}</div>
+                    <div class="stat-label">Avg Completions: {data['avg_agent_completions']:.2f}</div>
                     <div class="stat-label">Threshold: {data['threshold']} ({data['threshold_percentage']:.1f}%)</div>
                 </div>
 """
@@ -626,15 +626,15 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
         </script>
 """
     
-    # 5. Agent Completions Threshold Analysis
-    completions = [chapter_breakdown[c]['total_agent_completions'] for c in chapters]
+    # 5. Agent Completions Threshold Analysis (using average completions)
+    completions = [chapter_breakdown[c]['avg_agent_completions'] for c in chapters]
     thresholds = [chapter_breakdown[c]['threshold'] for c in chapters]
     colors = ['#27ae60' if c >= t else '#e74c3c' for c, t in zip(completions, thresholds)]
     
     fig6 = go.Figure()
-    fig6.add_trace(go.Bar(name='Actual Completions', x=chapters, y=completions, 
+    fig6.add_trace(go.Bar(name='Avg Completions', x=chapters, y=completions, 
                          marker_color=colors,
-                         hovertemplate='<b>%{x}</b><br>Actual: %{y:,}<br>Threshold: %{{customdata}}<br>Gap: %{{text}}<extra></extra>',
+                         hovertemplate='<b>%{x}</b><br>Avg Completions: %{y:.2f}<br>Threshold: %{{customdata}}<br>Gap: %{{text:.2f}}<extra></extra>',
                          customdata=thresholds,
                          text=[c - t for c, t in zip(completions, thresholds)]))
     fig6.add_trace(go.Scatter(name='Threshold', x=chapters, y=thresholds, 
@@ -642,9 +642,9 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
                              marker=dict(size=10),
                              hovertemplate='<b>%{x}</b><br>Threshold: %{y:,}<extra></extra>'))
     fig6.update_layout(
-        title='Agent Completions Threshold Analysis',
+        title='Agent Completions Threshold Analysis (Average per Chapter)',
         xaxis_title='Chapter',
-        yaxis_title='Agent Completions',
+        yaxis_title='Average Agent Completions',
         template='plotly_white',
         height=500,
         hovermode='x unified'
@@ -654,7 +654,7 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
     chart6_layout = json.dumps(fig6_dict['layout'])
     charts_html += f"""
         <div class="chart-container">
-            <div class="chart-title">Agent Completions Threshold Analysis (Green = Above Threshold, Red = Below Threshold)</div>
+            <div class="chart-title">Agent Completions Threshold Analysis - Average per Chapter (Green = Above Threshold, Red = Below Threshold)</div>
             <div id="chart6"></div>
         </div>
         <script>
@@ -662,37 +662,35 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
         </script>
 """
     
-    # 6. Chapter Threshold Performance (Gauge/Bar Chart) - Using Total Requests
+    # 6. Chapter Threshold Performance (Gauge/Bar Chart) - Using Average Completions
     # Note: chapter_breakdown and chapters are already defined above
     
-    # Import the function to get Total Requests thresholds
-    from cursor_metrics_calculator import get_total_requests_threshold_for_chapter
-    
-    # Calculate threshold percentages based on Total Requests with appropriate thresholds
+    # Calculate threshold percentages based on Average Completions with fixed thresholds
+    # The fixed thresholds (1000 for BE/FE, 400 for others) are already calculated in chapter_breakdown
     threshold_percentages = []
     for c in chapters:
         chapter_data = chapter_breakdown[c]
-        # Get the appropriate Total Requests threshold for this chapter
-        threshold = get_total_requests_threshold_for_chapter(c)
-        total_requests = chapter_data['total_requests']
-        # Use Total Requests as the metric for threshold calculation
-        threshold_percentage = (total_requests / threshold * 100) if threshold > 0 else 0
+        # Use the fixed threshold already calculated in chapter_breakdown
+        threshold = chapter_data['threshold']
+        avg_completions = chapter_data['avg_agent_completions']
+        # Use Average Completions as the metric for threshold calculation
+        threshold_percentage = (avg_completions / threshold * 100) if threshold > 0 else 0
         threshold_percentages.append(threshold_percentage)
     
-    # Prepare customdata as list of tuples: (status, total_requests)
+    # Prepare customdata as list of tuples: (status, avg_completions)
     customdata_list = [
-        ('Meets Target' if p >= 100 else 'Needs Improvement', chapter_breakdown[c]['total_requests'])
+        ('Meets Target' if p >= 100 else 'Needs Improvement', chapter_breakdown[c]['avg_agent_completions'])
         for p, c in zip(threshold_percentages, chapters)
     ]
     
     fig7 = go.Figure(data=[go.Bar(x=chapters, y=threshold_percentages,
                                   marker_color=['#27ae60' if p >= 100 else '#e74c3c' if p >= 50 else '#f39c12' for p in threshold_percentages],
-                                  hovertemplate='<b>%{x}</b><br>Achievement: %{y:.1f}%<br>Status: %{customdata[0]}<br>Total Requests: %{customdata[1]:,}<extra></extra>',
+                                  hovertemplate='<b>%{x}</b><br>Achievement: %{y:.1f}%<br>Status: %{customdata[0]}<br>Avg Completions: %{customdata[1]:.2f}<extra></extra>',
                                   customdata=customdata_list)])
     fig7.add_hline(y=100, line_dash="dash", line_color="orange", 
                    annotation_text="100% Target", annotation_position="right")
     fig7.update_layout(
-        title='Chapter Threshold Performance (% of Target Achieved) - Based on Total Requests',
+        title='Chapter Threshold Performance (% of Target Achieved) - Based on Average Completions',
         xaxis_title='Chapter',
         yaxis_title='Percentage of Threshold Achieved (%)',
         template='plotly_white',
@@ -703,7 +701,7 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
     chart7_layout = json.dumps(fig7_dict['layout'])
     charts_html += f"""
         <div class="chart-container">
-            <div class="chart-title">Chapter Threshold Performance (% of Target Achieved) - Based on Total Requests</div>
+            <div class="chart-title">Chapter Threshold Performance (% of Target Achieved) - Based on Average Completions</div>
             <div id="chart7"></div>
         </div>
         <script>
