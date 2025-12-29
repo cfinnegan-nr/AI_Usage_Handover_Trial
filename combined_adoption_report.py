@@ -114,7 +114,7 @@ class CombinedAdoptionAnalyzer:
 
             if filtered_users:
                 print(
-                    f"\n⚠️  WARNING: {len(filtered_users)} users from workbench questions CSV are NOT in useremails.csv:")
+                    f"\nWARNING: {len(filtered_users)} users from workbench questions CSV are NOT in useremails.csv:")
                 print(
                     "These users will be excluded from the report. Consider adding them to useremails.csv if they are new hires:")
                 for email in sorted(filtered_users):
@@ -239,7 +239,7 @@ class CombinedAdoptionAnalyzer:
             f"Loaded GitHub data for {len(user_data)} users (date filtered: {'yes' if date_range else 'no'})")
         if unmapped_github_users:
             print(
-                f"\n⚠️  WARNING: {len(unmapped_github_users)} GitHub users do not have a mapped non-empty email field:")
+                f"\nWARNING: {len(unmapped_github_users)} GitHub users do not have a mapped non-empty email field:")
             for user_login in sorted(unmapped_github_users):
                 print(f"  - {user_login}")
             print()
@@ -844,6 +844,106 @@ class CombinedAdoptionAnalyzer:
                     user['models_breakdown'],
                     user['features_breakdown']
                 ])
+
+    def generate_trends_csv_report(self, merged_users: List[Dict[str, Any]],
+                                   month: Optional[str], output_path: str):
+        """Generate trends CSV report with per-user data only, including Year/Month columns.
+        
+        This method creates a CSV file containing only the per-user statistics rows,
+        with Year and Month columns prepended. It does NOT include any summary
+        statistics sections.
+        
+        Args:
+            merged_users: List of user dictionaries with adoption statistics
+            month: Month string in YYYY-MM format (e.g., '2025-11')
+            output_path: Path for output CSV file
+            
+        Raises:
+            ValueError: If month parameter is invalid or missing
+            IOError: If file cannot be written
+        """
+        print(f"Generating trends CSV report: {output_path}")
+        
+        try:
+            # Parse month to get year and month abbreviation
+            year_str, month_abbrev = parse_month_to_year_and_abbrev(month)
+            
+            with open(output_path, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                
+                # Write header row with Year and Month as first two columns
+                writer.writerow([
+                    'Year', 'Month', 'Email', 'Chapter', 'Current Squad', 'GitHub Login', 
+                    'Days Active', 'WB Days Active', 'Workbench Questions', 'API Normal',
+                    'GitHub Requests', 'GH Acceptance Rate (%)', 'GH LOC Added', 'GH LOC Deleted', 
+                    'GitHub Agent', 'GitHub via Roo', 'API Embedding', 'Prompt Caching', 
+                    'Total Spend', 'Models Breakdown', 'GH Features Breakdown'
+                ])
+                
+                # Write per-user data rows (same structure as generate_csv_report, but with Year/Month prepended)
+                users_written = 0
+                users_skipped = 0
+                
+                for user in merged_users:
+                    try:
+                        writer.writerow([
+                            year_str,  # Year column
+                            month_abbrev,  # Month column
+                            user['email'],
+                            user['chapter'],
+                            user['squad'],
+                            user['github_login'],
+                            user['days_active'],
+                            user.get('wb_days_active', 0),
+                            user['workbench_questions'],
+                            user['workbench_requests_normal'],
+                            user['github_requests'],
+                            user['github_acceptance_rate'],
+                            user['loc_added'],
+                            user['loc_deleted'],
+                            'Yes' if user['used_agent'] else 'No',
+                            'Yes' if user['roo_in_use'] else 'No',
+                            user['workbench_requests_embedding'],
+                            'Yes' if user.get('uses_prompt_caching', False) else 'No',
+                            user['workbench_spend'],
+                            user['models_breakdown'],
+                            user['features_breakdown']
+                        ])
+                        users_written += 1
+                    except KeyError as e:
+                        # Log warning for missing user data fields but continue processing
+                        print(f"Warning: Missing field '{e}' for user {user.get('email', 'unknown')}. Skipping user.")
+                        users_skipped += 1
+                        continue
+                    except Exception as e:
+                        # Log error for user row but continue processing other users
+                        print(f"Error writing row for user {user.get('email', 'unknown')}: {e}")
+                        users_skipped += 1
+                        continue
+            
+            # Report actual count of users written (not total users processed)
+            if users_skipped > 0:
+                print(f"Generated trends CSV report with {users_written} users ({users_skipped} skipped due to errors)")
+            else:
+                print(f"Generated trends CSV report with {users_written} users")
+            
+        except ValueError as e:
+            # Re-raise ValueError with context
+            error_msg = f"Error generating trends CSV report: {e}"
+            print(error_msg)
+            raise ValueError(error_msg) from e
+        except IOError as e:
+            # Handle file I/O errors
+            error_msg = f"Error writing trends CSV file '{output_path}': {e}"
+            print(error_msg)
+            raise IOError(error_msg) from e
+        except Exception as e:
+            # Catch-all for any other unexpected errors
+            error_msg = f"Unexpected error generating trends CSV report: {e}"
+            print(error_msg)
+            import traceback
+            traceback.print_exc()
+            raise
 
     def generate_html_report(self, merged_users: List[Dict[str, Any]],
                              adoption_metrics: Dict[str, Any], output_path: str):
@@ -1546,11 +1646,51 @@ def constrain_date_range(requested_range: Tuple[datetime, datetime],
         )
 
     if constrained_start != requested_range[0] or constrained_end != requested_range[1]:
-        print("⚠️  Date range constrained to GitHub report availability:")
+        print("WARNING: Date range constrained to GitHub report availability:")
         print(f"   Requested: {requested_range[0]} to {requested_range[1]}")
         print(f"   Constrained: {constrained_start} to {constrained_end}")
 
     return constrained_start, constrained_end
+
+
+def parse_month_to_year_and_abbrev(month: Optional[str]) -> Tuple[str, str]:
+    """Parse month parameter (YYYY-MM format) to extract year and month abbreviation.
+    
+    Args:
+        month: Month string in YYYY-MM format (e.g., '2025-11')
+        
+    Returns:
+        Tuple of (year_str, month_abbrev) where:
+        - year_str: Year in YYYY format (e.g., '2025')
+        - month_abbrev: Month abbreviation in MMM format (e.g., 'Nov')
+        
+    Raises:
+        ValueError: If month format is invalid or month is None/empty
+    """
+    if not month:
+        raise ValueError("Month parameter is required for trends CSV generation")
+    
+    try:
+        # Parse YYYY-MM format
+        year, month_num = map(int, month.split('-'))
+        
+        # Validate month number
+        if month_num < 1 or month_num > 12:
+            raise ValueError(f"Invalid month number: {month_num}. Must be between 1 and 12.")
+        
+        # Create datetime object for the first day of the month to get abbreviation
+        month_date = datetime(year, month_num, 1)
+        month_abbrev = month_date.strftime('%b')  # Returns 'Nov', 'Dec', etc.
+        
+        year_str = str(year)
+        
+        return year_str, month_abbrev
+        
+    except ValueError as e:
+        # Re-raise ValueError with more context
+        raise ValueError(f"Invalid month format '{month}'. Expected YYYY-MM format (e.g., '2025-11'). Error: {e}")
+    except Exception as e:
+        raise ValueError(f"Error parsing month '{month}': {e}")
 
 
 def main():
@@ -1587,14 +1727,48 @@ Examples:
 
     args = parser.parse_args()
 
-    # Validate input files
-    if not os.path.exists(args.github_json):
-        print(f"Error: GitHub JSON file '{args.github_json}' not found.")
+    # Define input and output directories
+    input_dir = 'AI_Usage_Input'
+    output_dir = 'AI_Usage_Output'
+    
+    # Ensure output directory exists
+    try:
+        os.makedirs(output_dir, exist_ok=True)
+        print(f"Output directory '{output_dir}' ready")
+    except Exception as e:
+        print(f"Error: Could not create output directory '{output_dir}': {e}")
+        return 1
+    
+    # Construct input file paths with AI_Usage_Input prefix
+    try:
+        github_json_path = os.path.join(input_dir, args.github_json)
+        workbench_json_path = os.path.join(input_dir, args.workbench_json)
+        
+        # Handle optional workbench questions CSV
+        workbench_questions_csv_path = None
+        if args.workbench_questions_csv:
+            workbench_questions_csv_path = os.path.join(input_dir, args.workbench_questions_csv)
+    except Exception as e:
+        print(f"Error constructing input file paths: {e}")
         return 1
 
-    if not os.path.exists(args.workbench_json):
-        print(f"Error: Workbench JSON file '{args.workbench_json}' not found.")
+    # Validate input files exist
+    if not os.path.exists(github_json_path):
+        print(f"Error: GitHub JSON file '{github_json_path}' not found.")
+        print(f"  Expected location: {os.path.abspath(github_json_path)}")
         return 1
+
+    if not os.path.exists(workbench_json_path):
+        print(f"Error: Workbench JSON file '{workbench_json_path}' not found.")
+        print(f"  Expected location: {os.path.abspath(workbench_json_path)}")
+        return 1
+    
+    # Warn if optional workbench questions CSV is provided but doesn't exist
+    if workbench_questions_csv_path and not os.path.exists(workbench_questions_csv_path):
+        print(f"Warning: Workbench questions CSV '{workbench_questions_csv_path}' not found.")
+        print(f"  Expected location: {os.path.abspath(workbench_questions_csv_path)}")
+        print("  Continuing without workbench questions data...")
+        workbench_questions_csv_path = None
 
     try:
         # Derive requested date range
@@ -1605,7 +1779,7 @@ Examples:
 
         # Extract GitHub report's actual data availability range
         github_report_range = extract_github_report_date_range(
-            args.github_json)
+            github_json_path)
 
         # Constrain date range to GitHub report availability
         date_range = constrain_date_range(
@@ -1615,13 +1789,13 @@ Examples:
         analyzer = CombinedAdoptionAnalyzer()
 
         # Load data from both sources (apply date_range filtering where supported)
-        github_data = analyzer.load_github_data(args.github_json, date_range)
+        github_data = analyzer.load_github_data(github_json_path, date_range)
         workbench_data = analyzer.load_workbench_data(
-            args.workbench_json, date_range)
+            workbench_json_path, date_range)
 
         # Load workbench questions if CSV provided (no date filtering - CSV has no date column assume exported as such)
         workbench_questions = analyzer.load_workbench_questions(
-            args.workbench_questions_csv)
+            workbench_questions_csv_path)
 
         # Merge user data
         merged_users = analyzer.merge_user_data(
@@ -1631,11 +1805,45 @@ Examples:
         adoption_metrics = analyzer.calculate_adoption_metrics(
             merged_users, date_range)
 
+        # Construct output file paths with AI_Usage_Output prefix
+        try:
+            csv_output_path = os.path.join(output_dir, args.csv_output)
+            html_output_path = os.path.join(output_dir, args.html_output)
+            trends_csv_path = os.path.join(output_dir, 'fs-eng-ai-usage-trends.csv')
+        except Exception as e:
+            print(f"Error constructing output file paths: {e}")
+            return 1
+
+        # Determine month for trends CSV (use args.month if provided, otherwise derive from date_range)
+        trends_month = args.month
+        if not trends_month:
+            # Derive month from date_range start date
+            try:
+                start_date = date_range[0]
+                trends_month = f"{start_date.year}-{start_date.month:02d}"
+                print(f"Derived month '{trends_month}' from date range for trends CSV")
+            except Exception as e:
+                print(f"Warning: Could not derive month from date range: {e}")
+                print("  Trends CSV will use current month")
+                # Fallback to current month
+                now = datetime.now()
+                trends_month = f"{now.year}-{now.month:02d}"
+
         # Generate reports
-        analyzer.generate_csv_report(
-            merged_users, adoption_metrics, args.csv_output)
-        analyzer.generate_html_report(
-            merged_users, adoption_metrics, args.html_output)
+        try:
+            analyzer.generate_csv_report(
+                merged_users, adoption_metrics, csv_output_path)
+            analyzer.generate_html_report(
+                merged_users, adoption_metrics, html_output_path)
+            
+            # Generate trends CSV report (per-user data only with Year/Month columns)
+            analyzer.generate_trends_csv_report(
+                merged_users, trends_month, trends_csv_path)
+        except Exception as e:
+            print(f"Error generating reports: {e}")
+            import traceback
+            traceback.print_exc()
+            return 1
 
         print("\n" + "="*60)
         print("COMBINED ADOPTION REPORT SUMMARY")
@@ -1679,8 +1887,9 @@ Examples:
         print(
             f"  GitHub acceptance rate: {adoption_metrics['github_acceptance_rate']}%")
         print("\nReports generated:")
-        print(f"  CSV: {args.csv_output}")
-        print(f"  HTML: {args.html_output}")
+        print(f"  CSV: {csv_output_path}")
+        print(f"  HTML: {html_output_path}")
+        print(f"  Trends CSV: {trends_csv_path}")
         print("="*60)
 
         return 0
