@@ -26,7 +26,7 @@ import calendar
 
 
 def load_allowed_emails_and_metadata() -> Tuple[Set[str], Dict[str, Dict[str, str]]]:
-    """Load allowed emails and metadata (chapter, squad) from useremails.csv file."""
+    """Load allowed emails and metadata (chapter, squad, manager, target_threshold) from useremails.csv file."""
     try:
         emails = set()
         metadata = {}
@@ -38,7 +38,9 @@ def load_allowed_emails_and_metadata() -> Tuple[Set[str], Dict[str, Dict[str, st
                     emails.add(email)
                     metadata[email] = {
                         'chapter': row.get('chapter', '').strip(),
-                        'squad': row.get('Current Squad', '').strip()
+                        'squad': row.get('Current Squad', '').strip(),
+                        'manager': row.get('Manager', '').strip(),
+                        'target_threshold': row.get('Target_Threshold', '').strip()
                     }
         print(
             f"Loaded {len(emails)} allowed emails with metadata from useremails.csv")
@@ -853,6 +855,11 @@ class CombinedAdoptionAnalyzer:
         with Year and Month columns prepended. It does NOT include any summary
         statistics sections.
         
+        If the output file already exists:
+        - If no rows exist for the same Year/Month combination, new data is appended
+        - If rows exist for the same Year/Month combination, those rows are replaced
+          while preserving all other Year/Month rows
+        
         Args:
             merged_users: List of user dictionaries with adoption statistics
             month: Month string in YYYY-MM format (e.g., '2025-11')
@@ -868,64 +875,243 @@ class CombinedAdoptionAnalyzer:
             # Parse month to get year and month abbreviation
             year_str, month_abbrev = parse_month_to_year_and_abbrev(month)
             
+            # Define the header row with updated column names
+            header_row = [
+                'Manager', 'Year', 'Month', 'Email', 'Chapter', 'Current Squad', 'GitHub Login', 
+                'Target', 'Days Active', 'WB Days Active', 'Workbench Questions', 'API Normal (Non-Cursor)',
+                'GitHub Requests', 'GH Acceptance Rate (%)', 'GH LOC Added', 'GH LOC Deleted', 
+                'GitHub Agent', 'GitHub via Roo', 'API Embedding', 'Prompt Caching', 
+                'Total Spend', 'Models Breakdown', 'GH Features Breakdown',
+                'Cursor Total Requests', 'Cursor Agent Completions', 'Cursor LOC'
+            ]
+            
+            # Prepare new data rows
+            new_rows = []
+            users_written = 0
+            users_skipped = 0
+            
+            for user in merged_users:
+                try:
+                    # Look up Manager and Target from metadata
+                    email = user['email']
+                    user_metadata = EMAIL_METADATA.get(email, {})
+                    manager = user_metadata.get('manager', '').strip() or 'Unknown'
+                    target_threshold = user_metadata.get('target_threshold', '').strip()
+                    # Convert target_threshold to int, default to 400 if missing or invalid
+                    try:
+                        target_value = int(target_threshold) if target_threshold else 400
+                    except (ValueError, TypeError):
+                        target_value = 400
+                    
+                    row = [
+                        manager,  # Manager column (first column)
+                        year_str,  # Year column
+                        month_abbrev,  # Month column
+                        email,
+                        user['chapter'],
+                        user['squad'],
+                        user['github_login'],
+                        target_value,  # Target column (8th column)
+                        user['days_active'],
+                        user.get('wb_days_active', 0),
+                        user['workbench_questions'],
+                        user['workbench_requests_normal'],
+                        user['github_requests'],
+                        user['github_acceptance_rate'],
+                        user['loc_added'],
+                        user['loc_deleted'],
+                        'Yes' if user['used_agent'] else 'No',
+                        'Yes' if user['roo_in_use'] else 'No',
+                        user['workbench_requests_embedding'],
+                        'Yes' if user.get('uses_prompt_caching', False) else 'No',
+                        user['workbench_spend'],
+                        user['models_breakdown'],
+                        user['features_breakdown'],
+                        0,  # Cursor Total Requests (default)
+                        0,  # Cursor Agent Completions (default)
+                        0   # Cursor LOC (default)
+                    ]
+                    new_rows.append(row)
+                    users_written += 1
+                except KeyError as e:
+                    # Log warning for missing user data fields but continue processing
+                    print(f"Warning: Missing field '{e}' for user {user.get('email', 'unknown')}. Skipping user.")
+                    users_skipped += 1
+                    continue
+                except Exception as e:
+                    # Log error for user row but continue processing other users
+                    print(f"Error preparing row for user {user.get('email', 'unknown')}: {e}")
+                    users_skipped += 1
+                    continue
+            
+            # Check if file exists and handle accordingly
+            file_exists = os.path.exists(output_path)
+            
+            if file_exists:
+                # Read existing file
+                existing_rows = []
+                existing_header = None
+                year_col_idx = None
+                month_col_idx = None
+                
+                try:
+                    with open(output_path, 'r', newline='', encoding='utf-8') as csvfile:
+                        reader = csv.reader(csvfile)
+                        existing_header = next(reader, None)
+                        
+                        if existing_header:
+                            # Find Year and Month column indices
+                            try:
+                                year_col_idx = existing_header.index('Year')
+                                month_col_idx = existing_header.index('Month')
+                            except ValueError:
+                                # If Year/Month columns don't exist, treat as new file
+                                print(f"Warning: Existing file '{output_path}' does not have Year/Month columns. Creating new file.")
+                                file_exists = False
+                                existing_rows = []
+                            else:
+                                # Read all existing data rows
+                                for row in reader:
+                                    if len(row) > max(year_col_idx, month_col_idx):
+                                        existing_rows.append(row)
+                
+                except Exception as e:
+                    print(f"Warning: Error reading existing file '{output_path}': {e}")
+                    print("  Creating new file instead.")
+                    file_exists = False
+                    existing_rows = []
+                
+                if file_exists and existing_rows:
+                    # Check if any rows exist for this Year/Month combination
+                    matching_rows_exist = any(
+                        row[year_col_idx] == year_str and row[month_col_idx] == month_abbrev
+                        for row in existing_rows
+                    )
+                    
+                    if matching_rows_exist:
+                        # Remove existing rows for this Year/Month combination
+                        filtered_rows = [
+                            row for row in existing_rows
+                            if not (row[year_col_idx] == year_str and row[month_col_idx] == month_abbrev)
+                        ]
+                        print(f"Found existing rows for {year_str}/{month_abbrev}. Replacing {len(existing_rows) - len(filtered_rows)} rows.")
+                        existing_rows = filtered_rows
+                    else:
+                        print(f"No existing rows found for {year_str}/{month_abbrev}. Appending new data.")
+                
+                # Merge existing rows with new rows
+                all_rows = existing_rows + new_rows
+                
+                # Ensure header matches expected format (update if needed)
+                if existing_header:
+                    # CRITICAL: Normalize row lengths FIRST before any positional insertions
+                    # This ensures all rows have the same length, preventing insertion errors
+                    original_header_len = len(existing_header)
+                    for row in existing_rows:
+                        # Pad rows to match original header length
+                        while len(row) < original_header_len:
+                            row.append('')
+                        # Truncate if too long (shouldn't happen, but be safe)
+                        if len(row) > original_header_len:
+                            row[:] = row[:original_header_len]
+                    
+                    # Update column names if needed
+                    # Update 'API Normal' to 'API Normal (Non-Cursor)' if present
+                    if 'API Normal' in existing_header:
+                        api_normal_idx = existing_header.index('API Normal')
+                        existing_header[api_normal_idx] = 'API Normal (Non-Cursor)'
+                    
+                    # Ensure Manager column exists at the beginning
+                    manager_added = False
+                    if 'Manager' not in existing_header:
+                        existing_header.insert(0, 'Manager')
+                        # Insert default 'Unknown' for Manager in existing rows
+                        # Now safe because rows are normalized
+                        for row in existing_rows:
+                            row.insert(0, 'Unknown')
+                        manager_added = True
+                    
+                    # Ensure Target column exists at position 7 (8th column, 0-indexed)
+                    # After Manager, Year, Month, Email, Chapter, Current Squad, GitHub Login
+                    if 'Target' not in existing_header:
+                        # Find insertion point: after GitHub Login
+                        # Expected order: Manager (0), Year (1), Month (2), Email (3), 
+                        # Chapter (4), Current Squad (5), GitHub Login (6), Target (7)
+                        # Try to find GitHub Login column to determine insertion point
+                        try:
+                            github_login_idx = existing_header.index('GitHub Login')
+                            target_insert_idx = github_login_idx + 1
+                        except ValueError:
+                            # GitHub Login not found, try to find Days Active as fallback
+                            try:
+                                days_active_idx = existing_header.index('Days Active')
+                                target_insert_idx = days_active_idx
+                            except ValueError:
+                                # Fallback: insert at position 7
+                                target_insert_idx = 7
+                        
+                        existing_header.insert(target_insert_idx, 'Target')
+                        # Insert default 400 for Target in existing rows
+                        # Now safe because rows are normalized
+                        for row in existing_rows:
+                            row.insert(target_insert_idx, 400)
+                    
+                    # Ensure new Cursor columns exist
+                    cursor_columns = ['Cursor Total Requests', 'Cursor Agent Completions', 'Cursor LOC']
+                    missing_cursor_cols = [col for col in cursor_columns if col not in existing_header]
+                    
+                    if missing_cursor_cols:
+                        existing_header.extend(missing_cursor_cols)
+                        # Pad existing rows with default values for new columns
+                        for row in existing_rows:
+                            row.extend([''] * len(missing_cursor_cols))
+                    
+                    # Final normalization to match final header length
+                    header_len = len(existing_header)
+                    
+                    # Pad existing rows if needed (shouldn't be needed after normalization, but be safe)
+                    for row in existing_rows:
+                        while len(row) < header_len:
+                            row.append('')
+                        # Truncate if too long (shouldn't happen, but be safe)
+                        if len(row) > header_len:
+                            row[:] = row[:header_len]
+                    
+                    # Pad new rows if needed
+                    for row in new_rows:
+                        while len(row) < header_len:
+                            row.append('')
+                        # Truncate if too long (shouldn't happen, but be safe)
+                        if len(row) > header_len:
+                            row[:] = row[:header_len]
+                    
+                    header_row = existing_header
+                else:
+                    # No existing header, use new header
+                    header_row = header_row
+            else:
+                # File doesn't exist, use new header and rows
+                all_rows = new_rows
+            
+            # Write the file
             with open(output_path, 'w', newline='', encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
                 
-                # Write header row with Year and Month as first two columns
-                writer.writerow([
-                    'Year', 'Month', 'Email', 'Chapter', 'Current Squad', 'GitHub Login', 
-                    'Days Active', 'WB Days Active', 'Workbench Questions', 'API Normal',
-                    'GitHub Requests', 'GH Acceptance Rate (%)', 'GH LOC Added', 'GH LOC Deleted', 
-                    'GitHub Agent', 'GitHub via Roo', 'API Embedding', 'Prompt Caching', 
-                    'Total Spend', 'Models Breakdown', 'GH Features Breakdown'
-                ])
+                # Write header
+                writer.writerow(header_row)
                 
-                # Write per-user data rows (same structure as generate_csv_report, but with Year/Month prepended)
-                users_written = 0
-                users_skipped = 0
-                
-                for user in merged_users:
-                    try:
-                        writer.writerow([
-                            year_str,  # Year column
-                            month_abbrev,  # Month column
-                            user['email'],
-                            user['chapter'],
-                            user['squad'],
-                            user['github_login'],
-                            user['days_active'],
-                            user.get('wb_days_active', 0),
-                            user['workbench_questions'],
-                            user['workbench_requests_normal'],
-                            user['github_requests'],
-                            user['github_acceptance_rate'],
-                            user['loc_added'],
-                            user['loc_deleted'],
-                            'Yes' if user['used_agent'] else 'No',
-                            'Yes' if user['roo_in_use'] else 'No',
-                            user['workbench_requests_embedding'],
-                            'Yes' if user.get('uses_prompt_caching', False) else 'No',
-                            user['workbench_spend'],
-                            user['models_breakdown'],
-                            user['features_breakdown']
-                        ])
-                        users_written += 1
-                    except KeyError as e:
-                        # Log warning for missing user data fields but continue processing
-                        print(f"Warning: Missing field '{e}' for user {user.get('email', 'unknown')}. Skipping user.")
-                        users_skipped += 1
-                        continue
-                    except Exception as e:
-                        # Log error for user row but continue processing other users
-                        print(f"Error writing row for user {user.get('email', 'unknown')}: {e}")
-                        users_skipped += 1
-                        continue
+                # Write all rows
+                for row in all_rows:
+                    writer.writerow(row)
             
             # Report actual count of users written (not total users processed)
             if users_skipped > 0:
                 print(f"Generated trends CSV report with {users_written} users ({users_skipped} skipped due to errors)")
             else:
                 print(f"Generated trends CSV report with {users_written} users")
+            
+            if file_exists:
+                print(f"Preserved {len(existing_rows)} existing rows from other months")
             
         except ValueError as e:
             # Re-raise ValueError with context

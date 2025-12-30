@@ -9,3 +9,9 @@ python combined_adoption_report.py
 
 
 python combined_adoption_report.py --github-json github_copilot_metrics_november.json --workbench-json api_usage_permodel_stats_202512011107.json --workbench-questions-csv "Workbench User Details - Nov Dec.csv" --month 2025-11 --csv-output november_adoption.csv --html-output november_adoption.html
+
+
+python combined_adoption_report.py --github-json github_copilot_metrics_november.json --workbench-json api_usage_permodel_stats_202512011107.json --workbench-questions-csv "Workbench User Details - Nov Dec.csv" --month 2025-12 --csv-output december_adoption.csv --html-output december_adoption.html
+
+
+python combined_adoption_report.py --github-json github_copilot_metrics_december.json --workbench-json api_usage_permodel_stats_202512301234.json --workbench-questions-csv "Workbench User Details - Dec 22 Days.csv" --month 2025-12 --csv-output december_adoption.csv --html-output december_adoption.html
