@@ -291,7 +291,7 @@ def generate_html_report(merged_users: List[Dict[str, Any]],
                     <div class="stat-number" style="color: {threshold_color};">{threshold_status}</div>
                     <div class="stat-label"><strong>{chapter}</strong></div>
                     <div class="stat-label">Users: {data['active_users']}/{data['total_users']}</div>
-                    <div class="stat-label">Avg Completions: {data['avg_agent_completions']:.2f}</div>
+                    <div class="stat-label">Avg Requests: {data['avg_total_requests']:.2f}</div>
                     <div class="stat-label">Threshold: {data['threshold']} ({data['threshold_percentage']:.1f}%)</div>
                 </div>
 """
@@ -626,25 +626,25 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
         </script>
 """
     
-    # 5. Agent Completions Threshold Analysis (using average completions)
-    completions = [chapter_breakdown[c]['avg_agent_completions'] for c in chapters]
+    # 5. Total Requests Threshold Analysis (using average requests)
+    requests = [chapter_breakdown[c]['avg_total_requests'] for c in chapters]
     thresholds = [chapter_breakdown[c]['threshold'] for c in chapters]
-    colors = ['#27ae60' if c >= t else '#e74c3c' for c, t in zip(completions, thresholds)]
+    colors = ['#27ae60' if r >= t else '#e74c3c' for r, t in zip(requests, thresholds)]
     
     fig6 = go.Figure()
-    fig6.add_trace(go.Bar(name='Avg Completions', x=chapters, y=completions, 
+    fig6.add_trace(go.Bar(name='Avg Requests', x=chapters, y=requests, 
                          marker_color=colors,
-                         hovertemplate='<b>%{x}</b><br>Avg Completions: %{y:.2f}<br>Threshold: %{{customdata}}<br>Gap: %{{text:.2f}}<extra></extra>',
+                         hovertemplate='<b>%{x}</b><br>Avg Requests: %{y:.2f}<br>Threshold: %{{customdata}}<br>Gap: %{{text:.2f}}<extra></extra>',
                          customdata=thresholds,
-                         text=[c - t for c, t in zip(completions, thresholds)]))
+                         text=[r - t for r, t in zip(requests, thresholds)]))
     fig6.add_trace(go.Scatter(name='Threshold', x=chapters, y=thresholds, 
                              mode='lines+markers', line=dict(color='orange', width=3, dash='dash'),
                              marker=dict(size=10),
                              hovertemplate='<b>%{x}</b><br>Threshold: %{y:,}<extra></extra>'))
     fig6.update_layout(
-        title='Agent Completions Threshold Analysis (Average per Chapter)',
+        title='Total Requests Threshold Analysis (Average per Chapter)',
         xaxis_title='Chapter',
-        yaxis_title='Average Agent Completions',
+        yaxis_title='Average Total Requests',
         template='plotly_white',
         height=500,
         hovermode='x unified'
@@ -654,7 +654,7 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
     chart6_layout = json.dumps(fig6_dict['layout'])
     charts_html += f"""
         <div class="chart-container">
-            <div class="chart-title">Agent Completions Threshold Analysis - Average per Chapter (Green = Above Threshold, Red = Below Threshold)</div>
+            <div class="chart-title">Total Requests Threshold Analysis - Average per Chapter (Green = Above Threshold, Red = Below Threshold)</div>
             <div id="chart6"></div>
         </div>
         <script>
@@ -662,35 +662,35 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
         </script>
 """
     
-    # 6. Chapter Threshold Performance (Gauge/Bar Chart) - Using Average Completions
+    # 6. Chapter Threshold Performance (Gauge/Bar Chart) - Using Average Total Requests
     # Note: chapter_breakdown and chapters are already defined above
     
-    # Calculate threshold percentages based on Average Completions with fixed thresholds
-    # The fixed thresholds (1000 for BE/FE, 400 for others) are already calculated in chapter_breakdown
+    # Calculate threshold percentages based on Average Total Requests with fixed thresholds
+    # The fixed thresholds (5000 for BE/FE, 2000 for others) are already calculated in chapter_breakdown
     threshold_percentages = []
     for c in chapters:
         chapter_data = chapter_breakdown[c]
         # Use the fixed threshold already calculated in chapter_breakdown
         threshold = chapter_data['threshold']
-        avg_completions = chapter_data['avg_agent_completions']
-        # Use Average Completions as the metric for threshold calculation
-        threshold_percentage = (avg_completions / threshold * 100) if threshold > 0 else 0
+        avg_requests = chapter_data['avg_total_requests']
+        # Use Average Total Requests as the metric for threshold calculation
+        threshold_percentage = (avg_requests / threshold * 100) if threshold > 0 else 0
         threshold_percentages.append(threshold_percentage)
     
-    # Prepare customdata as list of tuples: (status, avg_completions)
+    # Prepare customdata as list of tuples: (status, avg_requests)
     customdata_list = [
-        ('Meets Target' if p >= 100 else 'Needs Improvement', chapter_breakdown[c]['avg_agent_completions'])
+        ('Meets Target' if p >= 100 else 'Needs Improvement', chapter_breakdown[c]['avg_total_requests'])
         for p, c in zip(threshold_percentages, chapters)
     ]
     
     fig7 = go.Figure(data=[go.Bar(x=chapters, y=threshold_percentages,
                                   marker_color=['#27ae60' if p >= 100 else '#e74c3c' if p >= 50 else '#f39c12' for p in threshold_percentages],
-                                  hovertemplate='<b>%{x}</b><br>Achievement: %{y:.1f}%<br>Status: %{customdata[0]}<br>Avg Completions: %{customdata[1]:.2f}<extra></extra>',
+                                  hovertemplate='<b>%{x}</b><br>Achievement: %{y:.1f}%<br>Status: %{customdata[0]}<br>Avg Requests: %{customdata[1]:.2f}<extra></extra>',
                                   customdata=customdata_list)])
     fig7.add_hline(y=100, line_dash="dash", line_color="orange", 
                    annotation_text="100% Target", annotation_position="right")
     fig7.update_layout(
-        title='Chapter Threshold Performance (% of Target Achieved) - Based on Average Completions',
+        title='Chapter Threshold Performance (% of Target Achieved) - Based on Average Total Requests',
         xaxis_title='Chapter',
         yaxis_title='Percentage of Threshold Achieved (%)',
         template='plotly_white',
@@ -701,7 +701,7 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
     chart7_layout = json.dumps(fig7_dict['layout'])
     charts_html += f"""
         <div class="chart-container">
-            <div class="chart-title">Chapter Threshold Performance (% of Target Achieved) - Based on Average Completions</div>
+            <div class="chart-title">Chapter Threshold Performance (% of Target Achieved) - Based on Average Total Requests</div>
             <div id="chart7"></div>
         </div>
         <script>
@@ -769,17 +769,17 @@ def generate_plotly_charts(merged_users: List[Dict[str, Any]],
 """
     
     # 8. Top Users - Reverse order (largest at top)
-    sorted_users = sorted(merged_users, key=lambda x: x.get('total_requests', 0) + x.get('agent_completions', 0), reverse=True)[:10]
+    sorted_users = sorted(merged_users, key=lambda x: x.get('total_requests', 0), reverse=True)[:10]
     # Reverse the lists so largest appears at top
     top_user_names = [u.get('name', u.get('email', ''))[:30] for u in sorted_users]
-    top_user_requests = [u.get('total_requests', 0) + u.get('agent_completions', 0) for u in sorted_users]
+    top_user_requests = [u.get('total_requests', 0) for u in sorted_users]
     
     fig8 = go.Figure(data=[go.Bar(y=top_user_names[::-1], x=top_user_requests[::-1], orientation='h',
                                   marker_color='#667eea',
-                                  hovertemplate='<b>%{y}</b><br>Total Activity: %{x:,}<extra></extra>')])
+                                  hovertemplate='<b>%{y}</b><br>Total Requests: %{x:,}<extra></extra>')])
     fig8.update_layout(
-        title='Top 10 Users by Total Activity (Requests + Completions)',
-        xaxis_title='Total Activity',
+        title='Top 10 Users by Total Requests',
+        xaxis_title='Total Requests',
         yaxis_title='User',
         template='plotly_white',
         height=500

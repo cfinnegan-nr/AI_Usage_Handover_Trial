@@ -151,7 +151,7 @@ def main():
         
         # Step 4: Load user leaderboard
         print("\nStep 4: Loading user leaderboard...")
-        leaderboard = load_user_leaderboard(leaderboard_path, allowed_emails)
+        leaderboard = load_user_leaderboard(leaderboard_path, allowed_emails, date_range)
         
         # Step 5: Load repository analytics
         print("\nStep 5: Loading repository analytics...")

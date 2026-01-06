@@ -68,6 +68,7 @@ def calculate_chapter_breakdown(merged_users: List[Dict[str, Any]]) -> Dict[str,
         'total_active_days': 0,
         'cache_read_tokens': 0,
         'cache_write_tokens': 0,
+        'target_thresholds': [],  # List to collect individual user thresholds
     })
     
     for user in merged_users:
@@ -97,29 +98,41 @@ def calculate_chapter_breakdown(merged_users: List[Dict[str, Any]]) -> Dict[str,
         chapter_data[chapter]['total_active_days'] += user.get('active_days', 0)
         chapter_data[chapter]['cache_read_tokens'] += user.get('cache_read_tokens', 0)
         chapter_data[chapter]['cache_write_tokens'] += user.get('cache_write_tokens', 0)
+        
+        # Collect target_threshold for this user
+        user_threshold = user.get('target_threshold', 400)
+        chapter_data[chapter]['target_thresholds'].append(user_threshold)
     
     # Calculate threshold metrics for each chapter
     result = {}
     for chapter, data in chapter_data.items():
-        # Get the fixed threshold for the chapter (1000 for BE/FE, 400 for others)
-        threshold = get_threshold_for_chapter(chapter)
-        total_completions = data['total_agent_completions']
+        # Calculate average threshold for the chapter from user Target_Threshold values
+        thresholds_list = data['target_thresholds']
+        if thresholds_list:
+            avg_threshold = sum(thresholds_list) / len(thresholds_list)
+        else:
+            # Fallback to default if no thresholds found
+            avg_threshold = get_total_requests_threshold_for_chapter(chapter)
+        
+        total_requests = data['total_requests']
         active_users = data['active_users']
         
-        # Calculate average completions per active user in the chapter
-        avg_completions = (total_completions / active_users) if active_users > 0 else 0
+        # Calculate average requests per active user in the chapter
+        avg_requests = (total_requests / active_users) if active_users > 0 else 0
         
-        # Compare average completions against the fixed threshold (not divided by users)
-        threshold_percentage = (avg_completions / threshold * 100) if threshold > 0 else 0
+        # Compare average requests against the average threshold for the chapter
+        threshold_percentage = (avg_requests / avg_threshold * 100) if avg_threshold > 0 else 0
         
         result[chapter] = {
             **data,
-            'avg_agent_completions': round(avg_completions, 2),
-            'threshold': threshold,  # Fixed threshold: 1000 for BE/FE, 400 for others
+            'avg_total_requests': round(avg_requests, 2),
+            'threshold': round(avg_threshold, 2),  # Average of user Target_Threshold values
             'threshold_percentage': round(threshold_percentage, 1),
-            'threshold_gap': round(avg_completions - threshold, 2),
-            'meets_threshold': avg_completions >= threshold,
+            'threshold_gap': round(avg_requests - avg_threshold, 2),
+            'meets_threshold': avg_requests >= avg_threshold,
         }
+        # Remove the temporary list from the result
+        del result[chapter]['target_thresholds']
     
     return result
 

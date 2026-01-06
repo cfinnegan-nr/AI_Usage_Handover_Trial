@@ -46,7 +46,7 @@ def find_newest_file_by_pattern(directory: str, pattern: str) -> Optional[str]:
 
 
 def load_allowed_emails_and_metadata() -> Tuple[Set[str], Dict[str, Dict[str, str]]]:
-    """Load allowed emails and metadata (chapter, squad) from useremails.csv file.
+    """Load allowed emails and metadata (chapter, squad, target_threshold) from useremails.csv file.
     Also loads emails from User_Leaderboard file and creates an INTERSECTION of both sets.
     Only emails present in BOTH files will be included.
     
@@ -67,7 +67,8 @@ def load_allowed_emails_and_metadata() -> Tuple[Set[str], Dict[str, Dict[str, st
                     useremails_set.add(email)
                     useremails_metadata[email] = {
                         'chapter': row.get('chapter', '').strip(),
-                        'squad': row.get('Current Squad', '').strip()
+                        'squad': row.get('Current Squad', '').strip(),
+                        'target_threshold': row.get('Target_Threshold', '').strip()
                     }
         print(f"Loaded {len(useremails_set)} emails from useremails.csv")
     except FileNotFoundError:
@@ -255,12 +256,14 @@ def load_usage_events(csv_path: str, allowed_emails: Set[str],
         return {}
 
 
-def load_user_leaderboard(csv_path: str, allowed_emails: Set[str]) -> Dict[str, Dict[str, Any]]:
+def load_user_leaderboard(csv_path: str, allowed_emails: Set[str], 
+                          date_range: Optional[Tuple[date, date]] = None) -> Dict[str, Dict[str, Any]]:
     """Load cursor_User_Leaderboard.csv and filter by allowed emails.
     
     Args:
         csv_path: Path to cursor_User_Leaderboard.csv
         allowed_emails: Set of allowed email addresses (lowercase)
+        date_range: Optional tuple of (start_date, end_date) to filter by
         
     Returns:
         Dictionary mapping email (lowercase) to leaderboard data
@@ -269,10 +272,26 @@ def load_user_leaderboard(csv_path: str, allowed_emails: Set[str]) -> Dict[str, 
     
     leaderboard_data = {}
     filtered_count = 0
+    date_filtered_count = 0
+    has_date_column = False
     
     try:
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
+            fieldnames = reader.fieldnames or []
+            
+            # Check if CSV has date columns
+            date_column_names = ['Date', 'Period', 'Month', 'Start Date', 'End Date', 'Report Period']
+            date_column = None
+            for col_name in date_column_names:
+                if col_name in fieldnames:
+                    date_column = col_name
+                    has_date_column = True
+                    break
+            
+            if date_range and not has_date_column:
+                print("Warning: User_Leaderboard.csv does not contain date columns. Leaderboard data may represent a different time period than the filtered usage events.")
+            
             for row_num, row in enumerate(reader, 1):
                 try:
                     email = row.get('Email', '').strip().lower()
@@ -282,6 +301,23 @@ def load_user_leaderboard(csv_path: str, allowed_emails: Set[str]) -> Dict[str, 
                     if email not in allowed_emails:
                         filtered_count += 1
                         continue
+                    
+                    # Filter by date range if provided and date column exists
+                    if date_range and date_column:
+                        date_str = row.get(date_column, '').strip()
+                        if date_str:
+                            try:
+                                # Try parsing various date formats
+                                date_str_clean = date_str.replace('Z', '+00:00')
+                                dt = datetime.fromisoformat(date_str_clean)
+                                event_date = dt.date()
+                                
+                                if not (date_range[0] <= event_date <= date_range[1]):
+                                    date_filtered_count += 1
+                                    continue
+                            except (ValueError, AttributeError):
+                                # If date parsing fails, include the row (don't filter it out)
+                                pass
                     
                     leaderboard_data[email] = {
                         'name': row.get('Name', '').strip(),
@@ -303,6 +339,8 @@ def load_user_leaderboard(csv_path: str, allowed_emails: Set[str]) -> Dict[str, 
         print(f"Loaded leaderboard data for {len(leaderboard_data)} users")
         if filtered_count > 0:
             print(f"  Filtered out {filtered_count} rows (email not in allowed list)")
+        if date_filtered_count > 0:
+            print(f"  Filtered out {date_filtered_count} rows (outside date range)")
         
         return leaderboard_data
         
@@ -409,6 +447,8 @@ def merge_cursor_user_data(usage_events: Dict[str, Dict[str, Any]],
     """Merge usage events and leaderboard data by email.
     
     Only includes users from useremails.csv. Users with no activity will have zero values.
+    Note: All users from allowed_emails are included in the output, even if they don't appear
+    in the leaderboard CSV. Missing leaderboard data defaults to 0 (e.g., agent_completions=0).
     
     Args:
         usage_events: Dictionary from load_usage_events()
@@ -423,6 +463,7 @@ def merge_cursor_user_data(usage_events: Dict[str, Dict[str, Any]],
     
     merged_users = []
     
+    # Iterate over all allowed emails to ensure all users are included
     for email in allowed_emails:
         events = usage_events.get(email, {})
         leader = leaderboard.get(email, {})
@@ -435,10 +476,18 @@ def merge_cursor_user_data(usage_events: Dict[str, Dict[str, Any]],
             for model, count in sorted(models_used.items(), key=lambda x: x[1], reverse=True)
         ) if models_used else ''
         
+        # Get target_threshold from metadata, default to 400 if missing or invalid
+        target_threshold_str = metadata.get('target_threshold', '').strip()
+        try:
+            target_threshold = int(target_threshold_str) if target_threshold_str else 400
+        except (ValueError, TypeError):
+            target_threshold = 400
+        
         merged_users.append({
             'email': email,
             'chapter': metadata.get('chapter', ''),
             'squad': metadata.get('squad', ''),
+            'target_threshold': target_threshold,
             'total_requests': events.get('total_requests', 0),
             'total_cost': events.get('total_cost', 0.0),
             'total_input_tokens': events.get('total_input_tokens', 0),
