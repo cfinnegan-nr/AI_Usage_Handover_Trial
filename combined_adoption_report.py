@@ -250,6 +250,7 @@ class CombinedAdoptionAnalyzer:
     def load_workbench_data(self, file_path: str, date_range: Tuple[datetime, datetime]) -> Dict[str, Dict[str, Any]]:
         """Load AI Workbench (API) usage data and aggregate by user email."""
         print(f"Loading Workbench data from {file_path}...")
+        print(f"  Date range filter: {date_range[0]} to {date_range[1]}")
 
         user_data = defaultdict(lambda: {
             'active_days': set(),
@@ -268,9 +269,23 @@ class CombinedAdoptionAnalyzer:
 
         # Try parsing as JSON array first
         try:
-            records = json.loads(content)
-            if not isinstance(records, list):
-                records = [records]
+            parsed = json.loads(content)
+            
+            # Handle case where JSON is an object with SQL query as key containing array of records
+            # Structure: {"SELECT ...": [record1, record2, ...]}
+            if isinstance(parsed, dict) and len(parsed) == 1:
+                # Get the first (and only) value
+                first_value = next(iter(parsed.values()))
+                if isinstance(first_value, list):
+                    # This is the array of records we want
+                    records = first_value
+                    print(f"  Detected SQL query key structure, extracted {len(records)} records from nested array")
+                else:
+                    records = [parsed]
+            elif isinstance(parsed, list):
+                records = parsed
+            else:
+                records = [parsed]
         except json.JSONDecodeError:
             # Try newline-delimited JSON
             records = []
@@ -278,19 +293,58 @@ class CombinedAdoptionAnalyzer:
                 line = line.strip()
                 if line:
                     try:
-                        records.append(json.loads(line))
+                        line_parsed = json.loads(line)
+                        # Handle nested structure in each line too
+                        if isinstance(line_parsed, dict) and len(line_parsed) == 1:
+                            first_value = next(iter(line_parsed.values()))
+                            if isinstance(first_value, list):
+                                records.extend(first_value)
+                            else:
+                                records.append(line_parsed)
+                        elif isinstance(line_parsed, list):
+                            records.extend(line_parsed)
+                        else:
+                            records.append(line_parsed)
                     except json.JSONDecodeError:
                         pass
 
+        # DIAGNOSTIC: Track filtering statistics
+        total_records = len(records)
+        filtered_no_email = 0
+        filtered_no_date = 0
+        filtered_date_parse_error = 0
+        filtered_date_out_of_range = 0
+        processed_records = 0
+        total_api_requests = 0
+        sample_record_keys = set()
+        sample_dates = []
+        sample_emails = set()
+
+        print(f"  Total records loaded from JSON: {total_records}")
+        if total_records > 0:
+            # Show sample record structure
+            sample_record = records[0]
+            sample_record_keys = set(sample_record.keys())
+            print(f"  Sample record keys: {sorted(sample_record_keys)}")
+
         # Process records
         for record in records:
+            # Track record keys for diagnostics
+            sample_record_keys.update(record.keys())
+
             email = record.get('email', '').lower()
             if not email:
+                filtered_no_email += 1
                 continue
+
+            # Track sample emails
+            if len(sample_emails) < 5:
+                sample_emails.add(email)
 
             # Parse and check date - MUST be within range to process record
             date_str = record.get('date', '')
             if not date_str:
+                filtered_no_date += 1
                 continue
 
             try:
@@ -304,11 +358,21 @@ class CombinedAdoptionAnalyzer:
                 # Using 5 hours as a reasonable offset
                 dt_uk = dt_utc + timedelta(hours=5)
                 date_parsed = dt_uk.date()
-            except (ValueError, AttributeError):
+            except (ValueError, AttributeError) as e:
+                filtered_date_parse_error += 1
+                if filtered_date_parse_error <= 3:  # Show first 3 parse errors
+                    print(f"  DIAGNOSTIC: Date parse error for record with email '{email}': date_str='{date_str}', error={e}")
                 continue
+
+            # Track sample dates
+            if len(sample_dates) < 10:
+                sample_dates.append((date_parsed, email))
 
             # Skip records outside date range
             if not (date_range[0] <= date_parsed <= date_range[1]):
+                filtered_date_out_of_range += 1
+                if filtered_date_out_of_range <= 3:  # Show first 3 out-of-range dates
+                    print(f"  DIAGNOSTIC: Date out of range for '{email}': {date_parsed} (range: {date_range[0]} to {date_range[1]})")
                 continue
 
             # Add this date to active days
@@ -325,6 +389,7 @@ class CombinedAdoptionAnalyzer:
             api_requests = record.get('api_requests', 0)
             user_data[email]['api_requests_total'] += api_requests
             user_data[email]['spend_total'] += record.get('spend', 0.0)
+            total_api_requests += api_requests
 
             # Track cache usage
             user_data[email]['cache_read_tokens'] += record.get(
@@ -340,6 +405,59 @@ class CombinedAdoptionAnalyzer:
                 user_data[email]['api_requests_embedding'] += api_requests
             else:
                 user_data[email]['api_requests_normal'] += api_requests
+
+            processed_records += 1
+
+        # DIAGNOSTIC: Print filtering statistics
+        print(f"\n  === WORKBENCH DATA LOADING DIAGNOSTICS ===")
+        print(f"  Total records in file: {total_records}")
+        print(f"  Records filtered - no email: {filtered_no_email}")
+        print(f"  Records filtered - no date: {filtered_no_date}")
+        print(f"  Records filtered - date parse error: {filtered_date_parse_error}")
+        print(f"  Records filtered - date out of range: {filtered_date_out_of_range}")
+        print(f"  Records successfully processed: {processed_records}")
+        print(f"  Total API requests aggregated: {total_api_requests}")
+        print(f"  Unique users with data: {len(user_data)}")
+        
+        if sample_record_keys:
+            print(f"  Record field names found: {sorted(sample_record_keys)}")
+        if sample_emails:
+            print(f"  Sample emails found: {sorted(list(sample_emails))[:5]}")
+        if sample_dates:
+            print(f"  Sample dates found (first 10):")
+            for d, e in sample_dates[:10]:
+                print(f"    {d} ({e})")
+        
+        # Check if api_requests field exists
+        if 'api_requests' not in sample_record_keys:
+            print(f"  *** WARNING: 'api_requests' field not found in record keys!")
+            print(f"  *** Available fields: {sorted(sample_record_keys)}")
+            print(f"  *** This may explain why API Users count is zero!")
+            # Check for alternative field names
+            possible_request_fields = [k for k in sample_record_keys if 'request' in k.lower() or 'count' in k.lower() or 'usage' in k.lower()]
+            if possible_request_fields:
+                print(f"  *** Possible alternative request fields found: {possible_request_fields}")
+                # Show sample values from first record
+                if records:
+                    sample = records[0]
+                    print(f"  *** Sample values from first record:")
+                    for field in possible_request_fields:
+                        print(f"      {field}: {sample.get(field, 'N/A')}")
+        
+        # Show users with non-zero api_requests_total
+        users_with_requests = {email: data['api_requests_total'] 
+                               for email, data in user_data.items() 
+                               if data['api_requests_total'] > 0}
+        if users_with_requests:
+            print(f"  Users with API requests > 0: {len(users_with_requests)}")
+            print(f"  Sample users with requests (first 5):")
+            for email, count in list(users_with_requests.items())[:5]:
+                print(f"    {email}: {count} requests")
+        else:
+            print(f"  *** WARNING: No users have api_requests_total > 0!")
+            print(f"  *** This explains why API Users count is zero!")
+        
+        print(f"  ============================================\n")
 
         print(f"Loaded Workbench data for {len(user_data)} users")
         return dict(user_data)
@@ -382,6 +500,26 @@ class CombinedAdoptionAnalyzer:
         active_emails = set(github_data.keys()) | set(workbench_data.keys())
         print(
             f"Including all {len(all_emails)} allowed users ({len(active_emails & ALLOWED_EMAILS)} with activity)")
+        
+        # DIAGNOSTIC: Check workbench data
+        print(f"\n  === MERGE DIAGNOSTICS ===")
+        print(f"  GitHub data users: {len(github_data)}")
+        print(f"  Workbench data users: {len(workbench_data)}")
+        if workbench_data:
+            wb_users_with_requests = {email: data.get('api_requests_total', 0) 
+                                     for email, data in workbench_data.items() 
+                                     if data.get('api_requests_total', 0) > 0}
+            print(f"  Workbench users with api_requests_total > 0: {len(wb_users_with_requests)}")
+            if wb_users_with_requests:
+                print(f"  Sample workbench users with requests (first 5):")
+                for email, count in list(wb_users_with_requests.items())[:5]:
+                    print(f"    {email}: {count} requests")
+            else:
+                print(f"  *** WARNING: No workbench users have api_requests_total > 0!")
+        else:
+            print(f"  *** WARNING: workbench_data is empty!")
+        print(f"  =========================\n")
+        
         business_days = self.calculate_business_days(
             date_range[0], date_range[1])
 
@@ -610,6 +748,27 @@ class CombinedAdoptionAnalyzer:
         # Workbench-specific metrics
         workbench_users = sum(
             1 for u in active_users if u['workbench_requests_total'] > 0)
+        
+        # DIAGNOSTIC: Check workbench_users calculation
+        print(f"\n  === WORKBENCH USERS CALCULATION DIAGNOSTICS ===")
+        print(f"  Total active_users: {len(active_users)}")
+        print(f"  Users with workbench_requests_total > 0: {workbench_users}")
+        
+        # Check workbench_requests_total values
+        wb_request_counts = [u['workbench_requests_total'] for u in active_users]
+        non_zero_wb_requests = [count for count in wb_request_counts if count > 0]
+        print(f"  Users with workbench_requests_total > 0: {len(non_zero_wb_requests)}")
+        if non_zero_wb_requests:
+            print(f"  Sample workbench_requests_total values: {sorted(non_zero_wb_requests, reverse=True)[:10]}")
+        else:
+            print(f"  *** WARNING: All users have workbench_requests_total = 0!")
+            print(f"  *** This explains why API Users count is zero!")
+            # Show sample users to verify data structure
+            print(f"  Sample active users (first 5) workbench_requests_total values:")
+            for u in active_users[:5]:
+                print(f"    {u.get('email', 'unknown')}: workbench_requests_total={u.get('workbench_requests_total', 0)}")
+        print(f"  ================================================\n")
+        
         embedding_users = sum(
             1 for u in active_users if u['workbench_requests_embedding'] > 0)
         prompt_caching_users = sum(
