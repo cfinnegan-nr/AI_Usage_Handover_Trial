@@ -9,6 +9,7 @@ Usage:
     python cursor_adoption_report.py
 """
 
+import argparse
 import os
 import sys
 from datetime import datetime, date
@@ -79,8 +80,37 @@ def extract_date_range_from_events(csv_path: str) -> Optional[Tuple[date, date]]
         return None
 
 
+def parse_month_suffix(month: str) -> str:
+    """Parse YYYY-MM month string into filename suffix format _MMM_YY."""
+    try:
+        month_date = datetime.strptime(f'{month}-01', '%Y-%m-%d')
+    except ValueError as exc:
+        raise ValueError(
+            f"Invalid --month '{month}'. Expected YYYY-MM format (e.g., 2026-01)."
+        ) from exc
+
+    month_abbrev = month_date.strftime('%b')
+    year_two_digit = month_date.strftime('%y')
+    return f'_{month_abbrev}_{year_two_digit}'
+
+
 def main():
     """Main function to generate Cursor AI adoption reports."""
+    parser = argparse.ArgumentParser(
+        description='Generate Cursor AI adoption reports',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python cursor_adoption_report.py --month 2026-01
+        """,
+    )
+    parser.add_argument(
+        '--month',
+        required=True,
+        help='Month in YYYY-MM format (e.g., 2026-01)',
+    )
+    args = parser.parse_args()
+
     print("="*60)
     print("Cursor AI Adoption Report Generator")
     print("="*60)
@@ -177,21 +207,32 @@ def main():
         output_dir = 'Cursor_Output'
         os.makedirs(output_dir, exist_ok=True)
         print(f"Output directory: {output_dir}")
-        
+
+        report_suffix = parse_month_suffix(args.month)
+
         # Step 9: Generate CSV reports
         print("\nStep 9: Generating CSV reports...")
-        generate_individual_report(merged_users, os.path.join(output_dir, 'cursor_individual_adoption_report.csv'))
+        generate_individual_report(
+            merged_users,
+            os.path.join(
+                output_dir, f'cursor_individual_adoption_report{report_suffix}.csv'
+            ),
+        )
         generate_master_report(
             merged_users, repo_analytics, master_metrics, date_range,
-            os.path.join(output_dir, 'cursor_master_adoption_report.csv')
+            os.path.join(
+                output_dir, f'cursor_master_adoption_report{report_suffix}.csv'
+            ),
         )
         
         # Step 10: Generate HTML report
         print("\nStep 10: Generating HTML report...")
         generate_html_report(
             merged_users, master_metrics, repo_analytics, date_range,
-            os.path.join(output_dir, 'cursor_adoption_report.html'),
-            fs_repo_names
+            os.path.join(
+                output_dir, f'cursor_adoption_report{report_suffix}.html'
+            ),
+            fs_repo_names,
         )
         
         # Summary
@@ -203,9 +244,15 @@ def main():
         print(f"Active Users: {master_metrics['active_users']}")
         print(f"Adoption Rate: {master_metrics['adoption_rate']}%")
         print(f"\nGenerated Files (in {output_dir}/):")
-        print(f"  - cursor_individual_adoption_report.csv")
-        print(f"  - cursor_master_adoption_report.csv")
-        print(f"  - cursor_adoption_report.html")
+        print(
+            f"  - cursor_individual_adoption_report{report_suffix}.csv"
+        )
+        print(
+            f"  - cursor_master_adoption_report{report_suffix}.csv"
+        )
+        print(
+            f"  - cursor_adoption_report{report_suffix}.html"
+        )
         print("="*60)
         
         return 0

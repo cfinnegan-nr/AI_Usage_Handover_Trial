@@ -1,0 +1,3310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined AI Adoption Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .timestamp {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .summary {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .summary h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .section-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            font-size: 0.85em;
+        }
+        th, td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover {
+            background-color: #2980b9;
+        }
+        th.sortable::after {
+            content: ' ⇅';
+            opacity: 0.5;
+            font-size: 0.7em;
+        }
+        th.sort-asc::after {
+            content: ' ▲';
+            opacity: 1;
+            font-size: 0.7em;
+        }
+        th.sort-desc::after {
+            content: ' ▼';
+            opacity: 1;
+            font-size: 0.7em;
+        }
+        .sort-info {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e8f4fd;
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #2c3e50;
+        }
+        td:first-child {
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #e8f4fd;
+        }
+        .yes {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .no {
+            color: #e74c3c;
+        }
+        /* Consistency row colouring removed to keep table styling neutral */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .table-container table {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Combined AI Adoption Report</h1>
+        <div class="timestamp">Generated on 2026-01-21 16:33:01</div>
+        <div class="timestamp">Report Period: 2026-01-01 to 2026-01-20</div>
+        
+        <div class="summary">
+            <h2>Summary</h2>
+            
+            <div class="section-title">Overall Adoption</div>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-number">130</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">99</div>
+                    <div class="stat-label">Monthly Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">76.2%</div>
+                    <div class="stat-label">Adoption Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">14</div>
+                    <div class="stat-label">Business Days</div>
+                </div>
+            </div>
+            <div class="section-title">Consistency Metrics (based on max of days_active and wb_days_active)</div>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-number">70.6%</div>
+                    <div class="stat-label">Mean Consistency</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">85.7%</div>
+                    <div class="stat-label">Median Consistency</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100.0%</div>
+                    <div class="stat-label">75th Percentile</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">53</div>
+                    <div class="stat-label">65% Active Days (40.8%)</div>
+                </div>
+            </div>
+            <div class="section-title">Agentic Consistency Metrics (based on days_active)</div>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-number">29.6%</div>
+                    <div class="stat-label">Mean Consistency</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">28.6%</div>
+                    <div class="stat-label">Median Consistency</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">50.0%</div>
+                    <div class="stat-label">75th Percentile</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">13</div>
+                    <div class="stat-label">65% Active Days (10.0%)</div>
+                </div>
+            </div>
+            
+            <div class="section-title">Platform Usage</div>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-number">64</div>
+                    <div class="stat-label">GitHub Copilot Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">API Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Both Platforms</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">40</div>
+                    <div class="stat-label">GitHub Agent Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Code Indexing Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Prompt Caching Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">84</div>
+                    <div class="stat-label">WB Questions Users</div>
+                </div>
+            </div>
+            
+            <div class="section-title">Intensity Metrics</div>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-number">2,838</div>
+                    <div class="stat-label">Total Agentic Requests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">21.83</div>
+                    <div class="stat-label">Mean Req/User</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">10.0</div>
+                    <div class="stat-label">Median Req/User</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">52.0</div>
+                    <div class="stat-label">P75 Req/User</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4,584</div>
+                    <div class="stat-label">Total WB Questions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">2.52</div>
+                    <div class="stat-label">Mean WB Questions/User/Day</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">20.7%</div>
+                    <div class="stat-label">GH Acceptance Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">83,700</div>
+                    <div class="stat-label">GH LOC Added</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12,033</div>
+                    <div class="stat-label">GH LOC Deleted</div>
+                </div>
+            </div>
+        </div>
+        
+        <h2>Per-User Adoption Statistics</h2>
+        <div class="sort-info">
+            <strong>Default Sort:</strong>
+            <select id="defaultSortSelect" style="padding: 5px; margin: 0 10px; border-radius: 4px; border: 1px solid #3498db;">
+                <option value="days_active">By All Days Active (Default)</option>
+                <option value="total_requests">By Total Requests</option>
+            </select>
+            <button id="resetSort" style="padding: 5px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Reset to Default</button>
+            <br><br>
+            <strong>Filter by Chapter:</strong>
+            <select id="chapterFilter" style="padding: 5px; margin: 0 10px; border-radius: 4px; border: 1px solid #3498db; min-width: 150px;">
+                <option value="">All Chapters</option>
+            </select>
+            <span id="filterDisplay" style="margin-left: 10px; font-style: italic; color: #7f8c8d;"></span>
+            <br><br>
+            <strong>Sort Info:</strong> Click on column headers to sort. Hold Shift and click additional headers for multi-column sort. Current sort: <span id="sortDisplay">All Days Active (descending)</span>
+        </div>
+        <div class="table-container">
+            <table id="adoptionTable">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Chapter</th>
+                        <th>Current Squad</th>
+                        <th>GitHub Login</th>
+                        <th>API/GH Days Active</th>
+                        <th>WB Days Active</th>
+                        <th>WB Requests</th>
+                        <th>API Requests</th>
+                        <th>GitHub Requests</th>
+                        <th>GH Accept Rate (%)</th>
+                        <th>GH LOC Added</th>
+                        <th>GH LOC Deleted</th>
+                        <th>GH Agent Used</th>
+                        <th>GH via Roo</th>
+                        <th>API Embed Requests</th>
+                        <th>API Prompt Caching</th>
+                        <th>API Spend</th>
+                        <th>Agentic Models Breakdown</th>
+                        <th>GH Features Breakdown</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-total-requests="77" data-max-days="14" data-days-active="12">
+                        <td>szymon.urbanski@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>surbanski-nr</td>
+                        <td>12</td>
+                        <td>14</td>
+                        <td>65</td>
+                        <td>0</td>
+                        <td>12</td>
+                        <td>5.1%</td>
+                        <td>23</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="157" data-max-days="14" data-days-active="11">
+                        <td>jan.kemnitz@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td>jkemnitz-nr</td>
+                        <td>11</td>
+                        <td>14</td>
+                        <td>43</td>
+                        <td>0</td>
+                        <td>114</td>
+                        <td>24.9%</td>
+                        <td>3,527</td>
+                        <td>1,116</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gemini-3.0-pro: 0, gpt-5.2: 0, gpt-4o: 0, claude-4.5-sonnet: 0, gpt-5.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 113, chat_inline: 1, code_completion: 0, agent_edit: 0, chat_panel_agent_mode: 0</td>
+                    </tr>
+                    <tr data-total-requests="106" data-max-days="14" data-days-active="11">
+                        <td>ewa.chojnacka@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>echojnacka-nr</td>
+                        <td>11</td>
+                        <td>14</td>
+                        <td>95</td>
+                        <td>0</td>
+                        <td>11</td>
+                        <td>27.5%</td>
+                        <td>663</td>
+                        <td>25</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.0-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 6, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="92" data-max-days="14" data-days-active="11">
+                        <td>ksawery.baranowski@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DetHub</td>
+                        <td>kbaranowski-nr</td>
+                        <td>11</td>
+                        <td>14</td>
+                        <td>40</td>
+                        <td>0</td>
+                        <td>52</td>
+                        <td>11.8%</td>
+                        <td>1,155</td>
+                        <td>720</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0, gpt-4o: 0, gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 30, chat_panel_ask_mode: 21, chat_inline: 1, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="51" data-max-days="14" data-days-active="11">
+                        <td>michal.jagielski@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td>mjagielski-nr</td>
+                        <td>11</td>
+                        <td>14</td>
+                        <td>40</td>
+                        <td>0</td>
+                        <td>11</td>
+                        <td>30.5%</td>
+                        <td>1,049</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-5.1-codex: 0, gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 5, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="524" data-max-days="14" data-days-active="10">
+                        <td>manikanta.reddy@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>InvHub</td>
+                        <td>mreddy-nr</td>
+                        <td>10</td>
+                        <td>14</td>
+                        <td>270</td>
+                        <td>0</td>
+                        <td>254</td>
+                        <td>12.9%</td>
+                        <td>2,823</td>
+                        <td>286</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0, unknown: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 253, chat_inline: 1, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="194" data-max-days="14" data-days-active="10">
+                        <td>salini.k@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>DetHub</td>
+                        <td>salinik-nr</td>
+                        <td>10</td>
+                        <td>14</td>
+                        <td>184</td>
+                        <td>0</td>
+                        <td>10</td>
+                        <td>42.4%</td>
+                        <td>441</td>
+                        <td>188</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-haiku: 0, claude-opus-4.5: 0, claude-4.5-sonnet: 0, gpt-5.0: 0, gpt-4.1: 0, claude-4.0-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 4, code_completion: 0, chat_panel_agent_mode: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="94" data-max-days="14" data-days-active="10">
+                        <td>dariusz.turowski@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>dturowski-nr</td>
+                        <td>10</td>
+                        <td>14</td>
+                        <td>34</td>
+                        <td>0</td>
+                        <td>60</td>
+                        <td>17.3%</td>
+                        <td>2,186</td>
+                        <td>50</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0, claude-4.5-haiku: 0, gpt-4.1: 0, unknown: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 59, chat_inline: 1, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="250" data-max-days="14" data-days-active="7">
+                        <td>malgorzata.solinska@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>InvHub</td>
+                        <td>msolinska-nr</td>
+                        <td>7</td>
+                        <td>14</td>
+                        <td>230</td>
+                        <td>0</td>
+                        <td>20</td>
+                        <td>13.7%</td>
+                        <td>547</td>
+                        <td>144</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 20, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="101" data-max-days="14" data-days-active="7">
+                        <td>olek.jacukowicz@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td>ajacukowicz-nr</td>
+                        <td>7</td>
+                        <td>14</td>
+                        <td>51</td>
+                        <td>0</td>
+                        <td>50</td>
+                        <td>2.4%</td>
+                        <td>129</td>
+                        <td>59</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-haiku: 0, claude-4.5-sonnet: 0, auto: 0, unknown: 0, gpt-5-mini: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 47, chat_inline: 3, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="79" data-max-days="14" data-days-active="7">
+                        <td>michal.sobkowiak@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td>msobkowiak-nr</td>
+                        <td>7</td>
+                        <td>14</td>
+                        <td>72</td>
+                        <td>0</td>
+                        <td>7</td>
+                        <td>20.9%</td>
+                        <td>24</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0, unknown: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 3, chat_inline: 1, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="176" data-max-days="14" data-days-active="6">
+                        <td>jakub.horyd@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>NR - WLM</td>
+                        <td>jhoryd-nr</td>
+                        <td>6</td>
+                        <td>14</td>
+                        <td>170</td>
+                        <td>0</td>
+                        <td>6</td>
+                        <td>26.7%</td>
+                        <td>221</td>
+                        <td>6</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 1, code_completion: 0, agent_edit: 0, chat_panel_agent_mode: 0</td>
+                    </tr>
+                    <tr data-total-requests="156" data-max-days="14" data-days-active="5">
+                        <td>anurag.sharma@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>NR</td>
+                        <td>asharma-nr</td>
+                        <td>5</td>
+                        <td>14</td>
+                        <td>69</td>
+                        <td>0</td>
+                        <td>87</td>
+                        <td>0.0%</td>
+                        <td>16,427</td>
+                        <td>561</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-5.1-codex: 0, claude-4.5-sonnet: 0, gemini-2.5-pro: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 87, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="89" data-max-days="14" data-days-active="5">
+                        <td>milena.mietkiewicz@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>InvHub</td>
+                        <td>mmietkiewicz-nr</td>
+                        <td>5</td>
+                        <td>14</td>
+                        <td>84</td>
+                        <td>0</td>
+                        <td>5</td>
+                        <td>19.7%</td>
+                        <td>76</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="78" data-max-days="14" data-days-active="5">
+                        <td>weronika.folejewska@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td>WeronikaFolejewska</td>
+                        <td>5</td>
+                        <td>14</td>
+                        <td>35</td>
+                        <td>0</td>
+                        <td>43</td>
+                        <td>0.0%</td>
+                        <td>3,533</td>
+                        <td>340</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 43, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="55" data-max-days="14" data-days-active="5">
+                        <td>katarzyna.nowak@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>knowak-nr</td>
+                        <td>5</td>
+                        <td>14</td>
+                        <td>50</td>
+                        <td>0</td>
+                        <td>5</td>
+                        <td>17.4%</td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="48" data-max-days="14" data-days-active="5">
+                        <td>ashok.manayangath@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - WLM</td>
+                        <td>amanayangath-nr</td>
+                        <td>5</td>
+                        <td>14</td>
+                        <td>43</td>
+                        <td>0</td>
+                        <td>5</td>
+                        <td>17.4%</td>
+                        <td>17</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 4, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="64" data-max-days="14" data-days-active="4">
+                        <td>edward.parry@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>edwardparrynet</td>
+                        <td>4</td>
+                        <td>14</td>
+                        <td>60</td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td>0.0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="208" data-max-days="14" data-days-active="3">
+                        <td>muhammad.fayyaz@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - WLM</td>
+                        <td>mfayyaz-nr</td>
+                        <td>3</td>
+                        <td>14</td>
+                        <td>198</td>
+                        <td>0</td>
+                        <td>10</td>
+                        <td>10.5%</td>
+                        <td>8</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 10, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="182" data-max-days="14" data-days-active="3">
+                        <td>rekha.john@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>NR - BasePlatform</td>
+                        <td>rjohn-nr</td>
+                        <td>3</td>
+                        <td>14</td>
+                        <td>179</td>
+                        <td>0</td>
+                        <td>3</td>
+                        <td>19.4%</td>
+                        <td>24</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="45" data-max-days="14" data-days-active="1">
+                        <td>alec.cornelius@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - BasePlatform</td>
+                        <td>acornelius-nr</td>
+                        <td>1</td>
+                        <td>14</td>
+                        <td>44</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>0.0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="329" data-max-days="14" data-days-active="0">
+                        <td>arsen.senyk@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>SE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>329</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="262" data-max-days="14" data-days-active="0">
+                        <td>alexey.antonov@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>262</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="182" data-max-days="14" data-days-active="0">
+                        <td>michal.kolaczkowski@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>NR</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>182</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="146" data-max-days="14" data-days-active="0">
+                        <td>martin.bourke@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>NR - WLM</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>146</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="141" data-max-days="14" data-days-active="0">
+                        <td>olga.zygman@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>141</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="103" data-max-days="14" data-days-active="0">
+                        <td>lukasz.andruszko@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>103</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="95" data-max-days="14" data-days-active="0">
+                        <td>mariusz.ratajczyk@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>95</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="81" data-max-days="14" data-days-active="0">
+                        <td>lewis.tipping@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>81</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="69" data-max-days="14" data-days-active="0">
+                        <td>monika.donder@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>69</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="65" data-max-days="14" data-days-active="0">
+                        <td>piotr.bartkowiak@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>65</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="61" data-max-days="14" data-days-active="0">
+                        <td>srividhya.senthil@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>CE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>61</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="58" data-max-days="14" data-days-active="0">
+                        <td>alan.shaw@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>NR</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>58</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="56" data-max-days="14" data-days-active="0">
+                        <td>kirti.yadav@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>56</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="52" data-max-days="14" data-days-active="0">
+                        <td>gareth.power@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>52</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="51" data-max-days="14" data-days-active="0">
+                        <td>andrzej.strugala@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>51</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="43" data-max-days="14" data-days-active="0">
+                        <td>artur.szpot@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>Disclosures</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>43</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="42" data-max-days="14" data-days-active="0">
+                        <td>patrick.kilmartin@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>42</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="41" data-max-days="14" data-days-active="0">
+                        <td>sarah.price@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub (Secondment to Visa)</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>41</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="39" data-max-days="14" data-days-active="0">
+                        <td>vikram.savkoor@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>39</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="38" data-max-days="14" data-days-active="0">
+                        <td>damian.lowe@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>38</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="36" data-max-days="14" data-days-active="0">
+                        <td>deirdre.cooper@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>36</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="35" data-max-days="14" data-days-active="0">
+                        <td>paul.nolan@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>NR</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>14</td>
+                        <td>35</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="78" data-max-days="13" data-days-active="8">
+                        <td>piotr.michalek@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td>piotrmichalekds</td>
+                        <td>8</td>
+                        <td>13</td>
+                        <td>31</td>
+                        <td>0</td>
+                        <td>47</td>
+                        <td>20.8%</td>
+                        <td>3,081</td>
+                        <td>402</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 47, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="36" data-max-days="13" data-days-active="4">
+                        <td>marek.tomaszewski@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td>mtomaszewski-nr</td>
+                        <td>4</td>
+                        <td>13</td>
+                        <td>32</td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td>39.0%</td>
+                        <td>26</td>
+                        <td>0</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="195" data-max-days="12" data-days-active="12">
+                        <td>filip.manczak@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>fmanczak-nr</td>
+                        <td>12</td>
+                        <td>10</td>
+                        <td>24</td>
+                        <td>0</td>
+                        <td>171</td>
+                        <td>18.4%</td>
+                        <td>614</td>
+                        <td>140</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 171, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="81" data-max-days="12" data-days-active="12">
+                        <td>lokesh.thadikamalla@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>DetHub</td>
+                        <td>Lthadikamalla-nr</td>
+                        <td>12</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>81</td>
+                        <td>14.3%</td>
+                        <td>25</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">unknown: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_unknown_mode: 80, chat_inline: 1, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="53" data-max-days="12" data-days-active="12">
+                        <td>vasuki.koli@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>Disclosures</td>
+                        <td>vkoli-nr</td>
+                        <td>12</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>52</td>
+                        <td>55.2%</td>
+                        <td>1,887</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 51, chat_inline: 1, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="39" data-max-days="12" data-days-active="9">
+                        <td>lukasz.konieczka@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td>lukaszkonieczka</td>
+                        <td>9</td>
+                        <td>12</td>
+                        <td>30</td>
+                        <td>0</td>
+                        <td>9</td>
+                        <td>14.6%</td>
+                        <td>13</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="39" data-max-days="12" data-days-active="9">
+                        <td>kamil.rotter@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>SAIkrotter</td>
+                        <td>9</td>
+                        <td>12</td>
+                        <td>30</td>
+                        <td>0</td>
+                        <td>9</td>
+                        <td>0.9%</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">unknown: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_unknown_mode: 2, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="29" data-max-days="12" data-days-active="1">
+                        <td>ciaran.finnegan@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>N/A</td>
+                        <td>cfinnegan-nr</td>
+                        <td>1</td>
+                        <td>12</td>
+                        <td>28</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 1</td>
+                    </tr>
+                    <tr data-total-requests="266" data-max-days="10" data-days-active="10">
+                        <td>hasan.hur@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DetHub</td>
+                        <td>hhur-nr</td>
+                        <td>10</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>266</td>
+                        <td>0.2%</td>
+                        <td>10,146</td>
+                        <td>2,192</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-4.1: 0, claude-4.5-sonnet: 0, claude-4.5-haiku: 0, gpt-5.1-codex: 0, unknown: 0, auto: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 255, chat_panel_ask_mode: 11, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="257" data-max-days="10" data-days-active="10">
+                        <td>ashish.nimoda@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>InvHub</td>
+                        <td>animoda-nr</td>
+                        <td>10</td>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>0</td>
+                        <td>255</td>
+                        <td>5.7%</td>
+                        <td>118</td>
+                        <td>0</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 254, chat_panel_ask_mode: 1, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="134" data-max-days="9" data-days-active="9">
+                        <td>david.cortizo@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>dcortizo-nr</td>
+                        <td>9</td>
+                        <td>8</td>
+                        <td>19</td>
+                        <td>0</td>
+                        <td>115</td>
+                        <td>4.7%</td>
+                        <td>5,844</td>
+                        <td>863</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gemini-3.0-pro: 0, claude-4.5-sonnet: 0, unknown: 0, gpt-5.2: 0, claude-opus-4.5: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 96, chat_panel_ask_mode: 17, chat_inline: 2, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="95" data-max-days="9" data-days-active="9">
+                        <td>pekun.akinyede@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>pakinyede-nr</td>
+                        <td>9</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>94</td>
+                        <td>7.5%</td>
+                        <td>1,309</td>
+                        <td>431</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 94, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="66" data-max-days="9" data-days-active="9">
+                        <td>blazej.gosz@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>blazejgosz</td>
+                        <td>9</td>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>0</td>
+                        <td>64</td>
+                        <td>8.3%</td>
+                        <td>9,468</td>
+                        <td>236</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 33, chat_panel_ask_mode: 31, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="25" data-max-days="9" data-days-active="9">
+                        <td>pawel.krzysztofik@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td>PawelKonradKrzysztofik</td>
+                        <td>9</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>25</td>
+                        <td>0.0%</td>
+                        <td>2,483</td>
+                        <td>112</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gemini-2.5-pro: 0, claude-opus-4.5: 0, gemini-3.0-pro: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 16, chat_panel_ask_mode: 7, chat_panel_custom_mode: 2, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="21" data-max-days="9" data-days-active="9">
+                        <td>ewa.bartkowiak@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>ebartkowiak-nr</td>
+                        <td>9</td>
+                        <td>5</td>
+                        <td>12</td>
+                        <td>0</td>
+                        <td>9</td>
+                        <td>22.4%</td>
+                        <td>111</td>
+                        <td>24</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">unknown: 0, claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_inline: 2, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="23" data-max-days="9" data-days-active="1">
+                        <td>wayne.vandeklee@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>wvandeklee-nr</td>
+                        <td>1</td>
+                        <td>9</td>
+                        <td>22</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>0.0%</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">unknown: 0, claude-4.0-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_inline: 1, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="21" data-max-days="9" data-days-active="0">
+                        <td>tomasz.fajfer@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>9</td>
+                        <td>21</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="137" data-max-days="8" data-days-active="8">
+                        <td>divyaa.manimaran@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>dmanimaran-nr</td>
+                        <td>8</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>137</td>
+                        <td>7.0%</td>
+                        <td>1,537</td>
+                        <td>371</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 137, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="41" data-max-days="8" data-days-active="8">
+                        <td>filipe.dasilva@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>fdasilva-nr</td>
+                        <td>8</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>41</td>
+                        <td>5.7%</td>
+                        <td>678</td>
+                        <td>56</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0, unknown: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_inline: 27, chat_panel_agent_mode: 8, chat_panel_ask_mode: 6, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="19" data-max-days="8" data-days-active="8">
+                        <td>kamil.zyjewski@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>DetHub</td>
+                        <td>kzyjewski-nr</td>
+                        <td>8</td>
+                        <td>5</td>
+                        <td>11</td>
+                        <td>0</td>
+                        <td>8</td>
+                        <td>33.8%</td>
+                        <td>116</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="54" data-max-days="8" data-days-active="6">
+                        <td>kamil.reczek@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - WLM</td>
+                        <td>kreczek-nr</td>
+                        <td>6</td>
+                        <td>8</td>
+                        <td>18</td>
+                        <td>0</td>
+                        <td>36</td>
+                        <td>35.6%</td>
+                        <td>1,077</td>
+                        <td>7</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-5.1: 0, gpt-5.2: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 36, code_completion: 0, agent_edit: 0, chat_panel_agent_mode: 0</td>
+                    </tr>
+                    <tr data-total-requests="25" data-max-days="8" data-days-active="6">
+                        <td>krystian.smolski@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>ksmolski-nr</td>
+                        <td>6</td>
+                        <td>8</td>
+                        <td>19</td>
+                        <td>0</td>
+                        <td>6</td>
+                        <td>26.5%</td>
+                        <td>52</td>
+                        <td>2</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">unknown: 0, claude-4.0-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_inline: 2, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="21" data-max-days="8" data-days-active="2">
+                        <td>jan.konupek@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td>jkonupek-nr</td>
+                        <td>2</td>
+                        <td>8</td>
+                        <td>19</td>
+                        <td>0</td>
+                        <td>2</td>
+                        <td>18.3%</td>
+                        <td>23</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="20" data-max-days="8" data-days-active="0">
+                        <td>jennifer.lalor@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>8</td>
+                        <td>20</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="307" data-max-days="7" data-days-active="7">
+                        <td>isaac.downs@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub (Secondment to DetHub)</td>
+                        <td>idowns-nr</td>
+                        <td>7</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>307</td>
+                        <td>0.0%</td>
+                        <td>4,950</td>
+                        <td>2,417</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 307, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="155" data-max-days="7" data-days-active="7">
+                        <td>lukasz.sobczuk@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>DetHub</td>
+                        <td>bszczuka-nr</td>
+                        <td>7</td>
+                        <td>2</td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td>151</td>
+                        <td>23.3%</td>
+                        <td>415</td>
+                        <td>0</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-5.2: 0, claude-opus-4.5: 0, gpt-5.1-codex: 0, gpt-5-codex: 0, gemini-3.0-pro: 0, gpt-5-mini: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 127, chat_panel_agent_mode: 24, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="23" data-max-days="7" data-days-active="7">
+                        <td>ethna.killeen@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - WLM</td>
+                        <td>ekilleen-nr</td>
+                        <td>7</td>
+                        <td>7</td>
+                        <td>16</td>
+                        <td>0</td>
+                        <td>7</td>
+                        <td>21.3%</td>
+                        <td>1,316</td>
+                        <td>978</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-5.0: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 1, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="17" data-max-days="7" data-days-active="7">
+                        <td>dominik.zalesny@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td>dzalesny-nr</td>
+                        <td>7</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>17</td>
+                        <td>12.5%</td>
+                        <td>1,695</td>
+                        <td>15</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0, gpt-5.2: 0, claude-opus-4.5: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 15, chat_panel_ask_mode: 1, chat_panel_custom_mode: 1, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="13" data-max-days="7" data-days-active="7">
+                        <td>emir.ramesh@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>Emir-SAI</td>
+                        <td>7</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>12</td>
+                        <td>9.9%</td>
+                        <td>1,687</td>
+                        <td>95</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0, unknown: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 12, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="7" data-max-days="7" data-days-active="7">
+                        <td>raul.macedofuzita@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td>rfuzita-nr</td>
+                        <td>7</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>7</td>
+                        <td>30.3%</td>
+                        <td>276</td>
+                        <td>3</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-5.1: 0, unknown: 0, gpt-4o: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 3, chat_inline: 2, code_completion: 0, agent_edit: 0</td>
+                    </tr>
+                    <tr data-total-requests="7" data-max-days="7" data-days-active="7">
+                        <td>bal.jandu@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>balsgh</td>
+                        <td>7</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>7</td>
+                        <td>30.0%</td>
+                        <td>163</td>
+                        <td>1</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">unknown: 0, claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_inline: 1, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="29" data-max-days="7" data-days-active="1">
+                        <td>jahnavi.m@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>jahnavim-nr</td>
+                        <td>1</td>
+                        <td>7</td>
+                        <td>16</td>
+                        <td>0</td>
+                        <td>13</td>
+                        <td>12.5%</td>
+                        <td>2</td>
+                        <td>0</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 10, chat_panel_agent_mode: 3</td>
+                    </tr>
+                    <tr data-total-requests="17" data-max-days="7" data-days-active="1">
+                        <td>tomek.kosmalski@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td>tkosmalski-nr</td>
+                        <td>1</td>
+                        <td>7</td>
+                        <td>16</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 1</td>
+                    </tr>
+                    <tr data-total-requests="17" data-max-days="7" data-days-active="0">
+                        <td>dominika.ciszewska@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>7</td>
+                        <td>17</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="6" data-max-days="6" data-days-active="6">
+                        <td>lauren.halpin@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>lauren-halpin</td>
+                        <td>6</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>6</td>
+                        <td>17.6%</td>
+                        <td>28</td>
+                        <td>0</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.0-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 4, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="6" data-max-days="6" data-days-active="6">
+                        <td>manjot.sian@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub</td>
+                        <td>msian-nr</td>
+                        <td>6</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>6</td>
+                        <td>11.1%</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="15" data-max-days="6" data-days-active="0">
+                        <td>alan.duggan@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>6</td>
+                        <td>15</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="37" data-max-days="5" data-days-active="5">
+                        <td>renata.kowalicka@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>rkowalicka-nr</td>
+                        <td>5</td>
+                        <td>4</td>
+                        <td>8</td>
+                        <td>0</td>
+                        <td>29</td>
+                        <td>6.6%</td>
+                        <td>211</td>
+                        <td>10</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 22, chat_panel_ask_mode: 7, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="12" data-max-days="5" data-days-active="5">
+                        <td>attracta.byrne@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DetHub</td>
+                        <td>attractabyrne-nr</td>
+                        <td>5</td>
+                        <td>3</td>
+                        <td>6</td>
+                        <td>0</td>
+                        <td>6</td>
+                        <td>4.2%</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0, claude-4.0-sonnet: 0, gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 5, chat_panel_agent_mode: 1, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="11" data-max-days="5" data-days-active="0">
+                        <td>marc.vanlaere@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>5</td>
+                        <td>11</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="53" data-max-days="4" data-days-active="4">
+                        <td>liam.horne@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub</td>
+                        <td>lhorne-nr</td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>53</td>
+                        <td>0.0%</td>
+                        <td>1,183</td>
+                        <td>182</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-4.5-sonnet: 0, gemini-3.0-pro: 0, gpt-5.1-codex: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 50, chat_panel_edit_mode: 3, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="5" data-max-days="4" data-days-active="4">
+                        <td>hao.guan@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DetHub</td>
+                        <td>haoguanAI</td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td>20.0%</td>
+                        <td>87</td>
+                        <td>0</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">claude-opus-4.5: 0, claude-4.5-sonnet: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 4, chat_panel_agent_mode: 0, agent_edit: 0, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="8" data-max-days="4" data-days-active="0">
+                        <td>tatiana.kukushkina@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td>8</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="8" data-max-days="4" data-days-active="0">
+                        <td>andrew.redmond@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>InvHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td>8</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="9" data-max-days="3" data-days-active="3">
+                        <td>greg.eden@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td>gregeden-nr</td>
+                        <td>3</td>
+                        <td>3</td>
+                        <td>6</td>
+                        <td>0</td>
+                        <td>3</td>
+                        <td>24.4%</td>
+                        <td>21</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="7" data-max-days="3" data-days-active="0">
+                        <td>poorna.pragna@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>NR - BasePlatform</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>3</td>
+                        <td>7</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="7" data-max-days="2" data-days-active="2">
+                        <td>tomasz.kazmierczak@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td>tkazmierczak-nr</td>
+                        <td>2</td>
+                        <td>2</td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>2</td>
+                        <td>35.0%</td>
+                        <td>166</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-4.1: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_ask_mode: 2, code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="5" data-max-days="2" data-days-active="0">
+                        <td>eddie.baggott@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>N/A</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>2</td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="4" data-max-days="2" data-days-active="0">
+                        <td>burak.kocak@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>CE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>2</td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="3" data-max-days="2" data-days-active="0">
+                        <td>denye.nabena@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="2" data-max-days="1" data-days-active="1">
+                        <td>grzegorz.plociennik@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>gplociennik-nr</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>100.0%</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="1" data-max-days="1" data-days-active="1">
+                        <td>ahmet.akkus@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>Disclosures</td>
+                        <td>aakkus-nr</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>42.9%</td>
+                        <td>9</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="1" data-max-days="1" data-days-active="1">
+                        <td>jonathan.hart@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>DataHub</td>
+                        <td>jhart-sai</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>0.0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;">code_completion: 0</td>
+                    </tr>
+                    <tr data-total-requests="1" data-max-days="1" data-days-active="1">
+                        <td>tomasz.domasat@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td>tdomasat-nr</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="yes">Yes</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;">gpt-5.2: 0</td>
+                        <td style="text-align: left; font-size: 0.8em;">chat_panel_agent_mode: 1</td>
+                    </tr>
+                    <tr data-total-requests="2" data-max-days="1" data-days-active="0">
+                        <td>dawid.piasecki@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="1" data-max-days="1" data-days-active="0">
+                        <td>mikolaj.wegner@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>mark.carter@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td>N/A</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>raj.puniyani@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>krasymyr.tretiak@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>nilam.pathak@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>Disclosures</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>margaret.cashman@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>pavansai.dasari@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>jure.vogrinc@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>bartlomiej.niemienionek@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>DetHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>john.walls@symphonyai.com</td>
+                        <td>CTO</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>anisha.agrahari@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>michal.mendyk@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DetHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>keith.kennedy@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td>N/A</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>ramyaasree.namana@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>NR - BasePlatform</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>wojciech.krysiak@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>ravi.dubey@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub (Contractor)</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>sugandan.sa@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>aashish.shirvastava@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>Disclosures</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>mitali.arora@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>ashwini.meti@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>rashmi.goudar@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>jedrzej.rybczynski@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>rakesh.nakum@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>DetHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>samuel.pekala@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>NR</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>trevor.murphy@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>DetHub</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>ajay.verma@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>Disclosures</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>jacek.bazydlo@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>philip.plunkett@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>alan.williams@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>charminda.bandara@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - BasePlatform</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>wang.shuai@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                    <tr data-total-requests="0" data-max-days="0" data-days-active="0">
+                        <td>lewis.cole@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td class="no">No</td>
+                        <td>0</td>
+                        <td class="no">No</td>
+                        <td>$0.00</td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                        <td style="text-align: left; font-size: 0.8em;"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <script>
+        class TableSorter {
+            constructor(tableId) {
+                this.table = document.getElementById(tableId);
+                this.tbody = this.table.querySelector('tbody');
+                this.headers = this.table.querySelectorAll('th');
+                this.sortState = [];
+                this.defaultSortMode = 'days_active';
+                this.chapterFilter = '';
+                this.init();
+            }
+            
+            init() {
+                this.headers.forEach((header, index) => {
+                    header.classList.add('sortable');
+                    header.addEventListener('click', (e) => this.handleSort(e, index));
+                });
+                
+                // Setup default sort dropdown
+                const sortSelect = document.getElementById('defaultSortSelect');
+                sortSelect.addEventListener('change', (e) => this.applyDefaultSort(e.target.value));
+                
+                // Setup reset button
+                const resetButton = document.getElementById('resetSort');
+                resetButton.addEventListener('click', () => {
+                    const sortSelect = document.getElementById('defaultSortSelect');
+                    this.applyDefaultSort(sortSelect.value);
+                });
+                
+                // Populate chapter filter dropdown
+                this.populateChapterFilter();
+                
+                // Setup chapter filter dropdown
+                const chapterFilterSelect = document.getElementById('chapterFilter');
+                chapterFilterSelect.addEventListener('change', (e) => this.applyChapterFilter(e.target.value));
+                
+                // Initialize with default sort
+                this.applyDefaultSort('days_active');
+            }
+            
+            populateChapterFilter() {
+                const rows = Array.from(this.tbody.querySelectorAll('tr'));
+                const chapters = new Set();
+                
+                rows.forEach(row => {
+                    const chapterCell = row.cells[1]; // Chapter is the second column (index 1)
+                    const chapterText = chapterCell.textContent.trim();
+                    if (chapterText) {
+                        chapters.add(chapterText);
+                    }
+                });
+                
+                // Sort chapters alphabetically
+                const sortedChapters = Array.from(chapters).sort();
+                
+                // Populate dropdown
+                const chapterFilterSelect = document.getElementById('chapterFilter');
+                sortedChapters.forEach(chapter => {
+                    const option = document.createElement('option');
+                    option.value = chapter;
+                    option.textContent = chapter;
+                    chapterFilterSelect.appendChild(option);
+                });
+            }
+            
+            applyChapterFilter(filterValue) {
+                this.chapterFilter = filterValue.trim();
+                const rows = Array.from(this.tbody.querySelectorAll('tr'));
+                let visibleCount = 0;
+                
+                rows.forEach(row => {
+                    const chapterCell = row.cells[1]; // Chapter is the second column (index 1)
+                    const chapterText = chapterCell.textContent.trim();
+                    
+                    if (this.chapterFilter === '' || chapterText === this.chapterFilter) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                // Update filter display
+                const filterDisplay = document.getElementById('filterDisplay');
+                if (this.chapterFilter === '') {
+                    filterDisplay.textContent = '';
+                } else {
+                    filterDisplay.textContent = `Showing ${visibleCount} of ${rows.length} users`;
+                }
+            }
+            
+            applyDefaultSort(mode) {
+                this.defaultSortMode = mode;
+                this.sortState = [];
+                
+                if (mode === 'total_requests') {
+                    // Sort by total requests (data attribute)
+                    this.sortByDataAttribute('total-requests', 'desc');
+                    this.updateSortDisplay('Total Requests (descending)');
+                } else {
+                    // Default: Sort by max days, then days_active, then total requests
+                    this.sortByComplexDefault();
+                    this.updateSortDisplay('All Days Active (descending)');
+                }
+                
+                this.updateHeaders();
+            }
+            
+            sortByDataAttribute(attribute, direction) {
+                const rows = Array.from(this.tbody.querySelectorAll('tr'));
+                rows.sort((a, b) => {
+                    const aVal = parseFloat(a.getAttribute('data-' + attribute)) || 0;
+                    const bVal = parseFloat(b.getAttribute('data-' + attribute)) || 0;
+                    return direction === 'desc' ? bVal - aVal : aVal - bVal;
+                });
+                rows.forEach(row => this.tbody.appendChild(row));
+            }
+            
+            sortByComplexDefault() {
+                const rows = Array.from(this.tbody.querySelectorAll('tr'));
+                rows.sort((a, b) => {
+                    // Sort by: max_days desc, days_active desc, total_requests desc
+                    const aMaxDays = parseFloat(a.getAttribute('data-max-days')) || 0;
+                    const bMaxDays = parseFloat(b.getAttribute('data-max-days')) || 0;
+                    if (aMaxDays !== bMaxDays) return bMaxDays - aMaxDays;
+                    
+                    const aDaysActive = parseFloat(a.getAttribute('data-days-active')) || 0;
+                    const bDaysActive = parseFloat(b.getAttribute('data-days-active')) || 0;
+                    if (aDaysActive !== bDaysActive) return bDaysActive - aDaysActive;
+                    
+                    const aTotalReq = parseFloat(a.getAttribute('data-total-requests')) || 0;
+                    const bTotalReq = parseFloat(b.getAttribute('data-total-requests')) || 0;
+                    return bTotalReq - aTotalReq;
+                });
+                rows.forEach(row => this.tbody.appendChild(row));
+            }
+            
+            handleSort(e, columnIndex) {
+                if (e.shiftKey) {
+                    // Multi-column sort with Shift
+                    const existingSort = this.sortState.find(s => s.column === columnIndex);
+                    if (existingSort) {
+                        // Toggle direction if column already in sort
+                        existingSort.direction = existingSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        // Add new column to sort
+                        this.addSortColumn(columnIndex, 'asc');
+                    }
+                } else {
+                    // Single column sort - determine direction based on current state
+                    const existingSort = this.sortState.find(s => s.column === columnIndex);
+                    const newDirection = existingSort && existingSort.direction === 'asc' ? 'desc' : 'asc';
+                    this.sortState = [];
+                    this.addSortColumn(columnIndex, newDirection);
+                }
+                
+                this.updateHeaders();
+                this.performSort();
+                this.updateSortDisplay();
+            }
+            
+            addSortColumn(columnIndex, direction) {
+                const existing = this.sortState.findIndex(s => s.column === columnIndex);
+                if (existing !== -1) {
+                    this.sortState[existing].direction = direction;
+                } else {
+                    this.sortState.push({ column: columnIndex, direction: direction });
+                }
+            }
+            
+            updateHeaders() {
+                this.headers.forEach((header, index) => {
+                    header.classList.remove('sort-asc', 'sort-desc');
+                    const sort = this.sortState.find(s => s.column === index);
+                    if (sort) {
+                        header.classList.add(sort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                    }
+                });
+            }
+            
+            performSort() {
+                const rows = Array.from(this.tbody.querySelectorAll('tr'));
+                
+                rows.sort((a, b) => {
+                    for (const sort of this.sortState) {
+                        const aCell = a.cells[sort.column].textContent.trim();
+                        const bCell = b.cells[sort.column].textContent.trim();
+                        
+                        // Try numeric sort first
+                        const aNum = parseFloat(aCell.replace(/[^0-9.-]/g, ''));
+                        const bNum = parseFloat(bCell.replace(/[^0-9.-]/g, ''));
+                        
+                        let comparison = 0;
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            comparison = aNum - bNum;
+                        } else {
+                            comparison = aCell.localeCompare(bCell);
+                        }
+                        
+                        if (comparison !== 0) {
+                            return sort.direction === 'asc' ? comparison : -comparison;
+                        }
+                    }
+                    return 0;
+                });
+                
+                rows.forEach(row => this.tbody.appendChild(row));
+            }
+            
+            updateSortDisplay(customText) {
+                const sortDisplay = document.getElementById('sortDisplay');
+                if (customText) {
+                    sortDisplay.textContent = customText;
+                } else if (this.sortState.length === 0) {
+                    sortDisplay.textContent = 'All Days Active (descending)';
+                } else {
+                    const displayParts = this.sortState.map(s => {
+                        const header = this.headers[s.column].textContent.trim();
+                        const direction = s.direction === 'asc' ? '↑' : '↓';
+                        return header + ' ' + direction;
+                    });
+                    sortDisplay.textContent = displayParts.join(', ');
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            new TableSorter('adoptionTable');
+        });
+        </script>
+        
+        <div style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+            <h3 style="margin-top: 0;">Legend</h3>
+            <p><strong>Consistency Rate:</strong> (Days Active / Business Days) × 100</p>
+            <p><strong>Platforms:</strong> Agentic = API/GH, GH = GitHub Copilot, WB = Workbench</p>
+        </div>
+    </div>
+</body>
+</html>
