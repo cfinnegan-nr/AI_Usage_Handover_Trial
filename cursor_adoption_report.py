@@ -10,10 +10,11 @@ Usage:
 """
 
 import argparse
+import csv
 import os
 import sys
 from datetime import datetime, date
-from typing import Tuple, Optional
+from typing import Dict, List, Optional, Tuple
 
 # Import our modules
 from cursor_data_loader import (
@@ -28,6 +29,23 @@ from cursor_data_loader import (
 from cursor_metrics_calculator import calculate_master_metrics, calculate_chapter_breakdown
 from cursor_csv_reporter import generate_individual_report, generate_master_report
 from cursor_html_reporter import generate_html_report
+
+OUTPUT_DIR = 'Cursor_Output'
+TRENDS_FILENAME = 'fs-eng-cursor-ai-usage-trends.csv'
+DEFAULT_TRENDS_COLUMNS = [
+    'Year',
+    'Month',
+    'Email',
+    'Total Requests',
+    'Agent Completions',
+    'Total AI Lines',
+]
+REQUIRED_INDIVIDUAL_COLUMNS = {
+    'Email',
+    'Total Requests',
+    'Agent Completions',
+    'Total AI Lines',
+}
 
 
 def extract_date_range_from_events(csv_path: str) -> Optional[Tuple[date, date]]:
@@ -80,18 +98,115 @@ def extract_date_range_from_events(csv_path: str) -> Optional[Tuple[date, date]]
         return None
 
 
-def parse_month_suffix(month: str) -> str:
-    """Parse YYYY-MM month string into filename suffix format _MMM_YY."""
+def parse_month_date(month: str) -> datetime:
+    """Parse YYYY-MM month string into a datetime for the first day."""
     try:
-        month_date = datetime.strptime(f'{month}-01', '%Y-%m-%d')
+        return datetime.strptime(f'{month}-01', '%Y-%m-%d')
     except ValueError as exc:
         raise ValueError(
             f"Invalid --month '{month}'. Expected YYYY-MM format (e.g., 2026-01)."
         ) from exc
 
+
+def parse_month_suffix(month: str) -> str:
+    """Parse YYYY-MM month string into filename suffix format _MMM_YY."""
+    month_date = parse_month_date(month)
     month_abbrev = month_date.strftime('%b')
     year_two_digit = month_date.strftime('%y')
     return f'_{month_abbrev}_{year_two_digit}'
+
+
+def parse_month_parts(month: str) -> Tuple[str, str]:
+    """Parse YYYY-MM month string into (year, month_abbrev)."""
+    month_date = parse_month_date(month)
+    return month_date.strftime('%Y'), month_date.strftime('%b')
+
+
+def read_individual_report_rows(report_path: str) -> List[Dict[str, str]]:
+    """Read the individual adoption report as a list of dict rows."""
+    with open(report_path, 'r', newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        if not reader.fieldnames:
+            raise ValueError(
+                f'No headers found in individual report: {report_path}'
+            )
+
+        missing_columns = REQUIRED_INDIVIDUAL_COLUMNS - set(reader.fieldnames)
+        if missing_columns:
+            missing_list = ', '.join(sorted(missing_columns))
+            raise ValueError(
+                f'Missing required columns in individual report: {missing_list}'
+            )
+
+        return list(reader)
+
+
+def normalize_trends_header(existing_header: Optional[List[str]]) -> List[str]:
+    """Ensure Year/Month are the leftmost columns in the trends header."""
+    header = existing_header or DEFAULT_TRENDS_COLUMNS
+    return ['Year', 'Month'] + [col for col in header if col not in {'Year', 'Month'}]
+
+
+def update_trends_csv(
+    individual_report_path: str,
+    trends_path: str,
+    year_str: str,
+    month_abbrev: str,
+) -> None:
+    """Update the trends CSV by replacing rows for a specific year/month."""
+    new_rows_source = read_individual_report_rows(individual_report_path)
+    if not new_rows_source:
+        print(
+            "Warning: Individual report contains no data rows; "
+            "skipping trends update."
+        )
+        return
+
+    existing_header: Optional[List[str]] = None
+    existing_rows: List[Dict[str, str]] = []
+
+    if os.path.exists(trends_path):
+        with open(trends_path, 'r', newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            existing_header = (
+                list(reader.fieldnames)
+                if reader.fieldnames is not None
+                else None
+            )
+            if existing_header:
+                existing_rows = list(reader)
+
+    header = normalize_trends_header(existing_header)
+    remaining_rows = [
+        row for row in existing_rows
+        if not (
+            row.get('Year', '').strip() == year_str
+            and row.get('Month', '').strip() == month_abbrev
+        )
+    ]
+
+    new_rows: List[Dict[str, str]] = []
+    for row in new_rows_source:
+        out_row = {col: '' for col in header}
+        out_row['Year'] = year_str
+        out_row['Month'] = month_abbrev
+        for col in header:
+            if col in row:
+                out_row[col] = row[col]
+        new_rows.append(out_row)
+
+    final_rows = remaining_rows + new_rows
+    with open(trends_path, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=header)
+        writer.writeheader()
+        writer.writerows(final_rows)
+
+    replaced_count = len(existing_rows) - len(remaining_rows)
+    print(
+        "Updated trends file: "
+        f"{os.path.basename(trends_path)} "
+        f"(replaced {replaced_count} rows, added {len(new_rows)} rows)"
+    )
 
 
 def main():
@@ -204,34 +319,49 @@ Examples:
         
         # Step 8: Create output directory
         print("\nStep 8: Creating output directory...")
-        output_dir = 'Cursor_Output'
+        output_dir = OUTPUT_DIR
         os.makedirs(output_dir, exist_ok=True)
         print(f"Output directory: {output_dir}")
 
         report_suffix = parse_month_suffix(args.month)
+        year_str, month_abbrev = parse_month_parts(args.month)
 
         # Step 9: Generate CSV reports
         print("\nStep 9: Generating CSV reports...")
+        individual_report_path = os.path.join(
+            output_dir, f'cursor_individual_adoption_report{report_suffix}.csv'
+        )
+        master_report_path = os.path.join(
+            output_dir, f'cursor_master_adoption_report{report_suffix}.csv'
+        )
+        html_report_path = os.path.join(
+            output_dir, f'cursor_adoption_report{report_suffix}.html'
+        )
+
         generate_individual_report(
             merged_users,
-            os.path.join(
-                output_dir, f'cursor_individual_adoption_report{report_suffix}.csv'
-            ),
+            individual_report_path,
         )
         generate_master_report(
             merged_users, repo_analytics, master_metrics, date_range,
-            os.path.join(
-                output_dir, f'cursor_master_adoption_report{report_suffix}.csv'
-            ),
+            master_report_path,
         )
         
-        # Step 10: Generate HTML report
-        print("\nStep 10: Generating HTML report...")
+        # Step 10: Update trends CSV
+        print("\nStep 10: Updating trends CSV...")
+        trends_path = os.path.join(output_dir, TRENDS_FILENAME)
+        update_trends_csv(
+            individual_report_path,
+            trends_path,
+            year_str,
+            month_abbrev,
+        )
+
+        # Step 11: Generate HTML report
+        print("\nStep 11: Generating HTML report...")
         generate_html_report(
             merged_users, master_metrics, repo_analytics, date_range,
-            os.path.join(
-                output_dir, f'cursor_adoption_report{report_suffix}.html'
-            ),
+            html_report_path,
             fs_repo_names,
         )
         
@@ -244,15 +374,10 @@ Examples:
         print(f"Active Users: {master_metrics['active_users']}")
         print(f"Adoption Rate: {master_metrics['adoption_rate']}%")
         print(f"\nGenerated Files (in {output_dir}/):")
-        print(
-            f"  - cursor_individual_adoption_report{report_suffix}.csv"
-        )
-        print(
-            f"  - cursor_master_adoption_report{report_suffix}.csv"
-        )
-        print(
-            f"  - cursor_adoption_report{report_suffix}.html"
-        )
+        print(f"  - {os.path.basename(individual_report_path)}")
+        print(f"  - {os.path.basename(master_report_path)}")
+        print(f"  - {os.path.basename(html_report_path)}")
+        print(f"  - {TRENDS_FILENAME}")
         print("="*60)
         
         return 0

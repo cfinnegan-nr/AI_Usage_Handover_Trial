@@ -46,26 +46,19 @@ Follow these steps to generate the complete AI usage adoption reports:
 
 ### Step 5: Run Cursor Adoption Report
 
-- Ensure the file `fs-eng-cursor-ai-usage-trends.csv` exists in:
-  ```
-  C:\Sensa_NR\2026\AI_Usage\AI_Usage_Rpt_Trial\Cursor_Output
-  ```
 - Run the `cursor_adoption_report.py` application with the `--month YYYY-MM` argument:
   ```bash
   python cursor_adoption_report.py --month 2025-10
   ```
 
-### Step 6: Update Cursor Trends File (Manual Step)
+### Step 6: Update Cursor Trends File (Automated)
 
-- **For now**: Manually append the current month's Cursor data from:
+- The report run automatically updates or creates:
   ```
-  cursor_individual_adoption_report_Jan_26.csv
+  Cursor_Output/fs-eng-cursor-ai-usage-trends.csv
   ```
-  into the file:
-  ```
-  fs-eng-cursor-ai-usage-trends.csv
-  ```
-- ⚠️ **Note**: This is a temporary manual step until automation is implemented
+- The script replaces any existing rows for the same Year/Month and appends the new
+  month’s data from `cursor_individual_adoption_report_MMM_YY.csv`.
 
 ### Step 7: Run All Tools Adoption Report
 
