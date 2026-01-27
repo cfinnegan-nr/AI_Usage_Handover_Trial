@@ -4,6 +4,87 @@
 
 The `combined_adoption_report.py` script generates comprehensive adoption-focused reports by combining GitHub Copilot usage statistics with AI Workbench (API) usage statistics. This provides a unified view of AI tool adoption across your organization.
 
+## Getting Started - Workflow Instructions
+
+Follow these steps to generate the complete AI usage adoption reports:
+
+### Step 1: Extract Data Sources
+
+- Run the data extracts from **Grafana** (Grafana dashboard)
+- Run the data extracts from **GitHub Insights**
+- Add all extracted data files into the input folder:
+  ```
+  C:\Sensa_NR\2026\AI_Usage\AI_Usage_Rpt_Trial\AI_Usage_Input
+  ```
+
+### Step 2: Prepare Output Directory
+
+- Navigate to the output folder:
+  ```
+  C:\Sensa_NR\2026\AI_Usage\AI_Usage_Rpt_Trial\AI_Usage_Output
+  ```
+- **Clear out all content** EXCEPT for the file named: `fs-eng-ai-usage-trends.csv`
+  - ⚠️ **Important**: Do not delete `fs-eng-ai-usage-trends.csv` as it contains historical trend data
+
+### Step 3: Run Combined Adoption Report
+
+- Update the command line prompt with:
+  - Input file paths (GitHub JSON, Workbench JSON, Workbench Questions CSV)
+  - Required date range (using `--month` or `--start-date`/`--end-date`)
+- Run the `combined_adoption_report.py` application with the updated arguments
+- Verify the outputs are generated correctly
+
+### Step 4: Prepare Cursor Data
+
+- Copy the **Cursor (x3) data extracts** into the folder:
+  ```
+  C:\Sensa_NR\2026\AI_Usage\AI_Usage_Rpt_Trial\Cursor_Data
+  ```
+- Ensure the following files are present in `Cursor_Data`:
+  - `FS_Repo_List.csv`
+  - All Cursor data extract files
+
+### Step 5: Run Cursor Adoption Report
+
+- Ensure the file `fs-eng-cursor-ai-usage-trends.csv` exists in:
+  ```
+  C:\Sensa_NR\2026\AI_Usage\AI_Usage_Rpt_Trial\Cursor_Output
+  ```
+- Run the `cursor_adoption_report.py` application with the `--month YYYY-MM` argument:
+  ```bash
+  python cursor_adoption_report.py --month 2025-10
+  ```
+
+### Step 6: Update Cursor Trends File (Manual Step)
+
+- **For now**: Manually append the current month's Cursor data from:
+  ```
+  cursor_individual_adoption_report_Jan_26.csv
+  ```
+  into the file:
+  ```
+  fs-eng-cursor-ai-usage-trends.csv
+  ```
+- ⚠️ **Note**: This is a temporary manual step until automation is implemented
+
+### Step 7: Run All Tools Adoption Report
+
+- Run the `all_tools_adoption_report.py` application with the `--month YYYY-MM` argument:
+  ```bash
+  python all_tools_adoption_report.py --month 2025-10
+  ```
+- Verify that the file `fs-eng-ai-usage-trends.csv` has been updated with Cursor numbers
+
+### Step 8: Generate PowerBI Report
+
+- Run the PowerBI report (stored external to this project)
+- Verify the report locally before promoting to PBI Server
+- ✅ **Checkpoint**: Review all metrics and data quality before finalizing
+
+---
+
+> **💡 Tip**: Keep a checklist of these steps for each reporting cycle to ensure nothing is missed.
+
 ## Why Use This Report?
 
 This report is specifically designed for tracking **adoption** rather than just usage intensity. It answers key questions like:
