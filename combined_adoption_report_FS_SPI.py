@@ -261,6 +261,52 @@ class CombinedAdoptionAnalyzer(BaseAnalyzer):
         print(f"Loaded Workbench data for {len(user_data)} users")
         return dict(user_data)
 
+    def merge_user_data(
+        self,
+        github_data: Dict[str, Dict],
+        workbench_data: Dict[str, Dict],
+        date_range: Tuple[datetime, datetime],
+        workbench_questions: Optional[Dict[str, int]] = None,
+    ) -> list[Dict[str, Any]]:
+        """
+        Merge GitHub and Workbench data, ensuring Azure CSV-only users are included.
+
+        The base implementation iterates only over ALLOWED_EMAILS, which can drop
+        Azure CSV users not present in useremails.csv. We include those users while
+        preserving the base merge behavior and metadata for allowed users.
+        """
+        # Use base logic but include any emails present in Azure CSV data.
+        # This preserves existing output format while preventing silent data loss.
+        # ALLOWED_EMAILS is defined in the base module; fall back to empty if unavailable.
+        try:
+            from combined_adoption_report import ALLOWED_EMAILS as original_allowed  # type: ignore
+        except Exception:
+            original_allowed = None
+
+        base_allowed_snapshot = set(original_allowed) if original_allowed else set()
+
+        # Create a combined allow list: all allowed users + any Azure CSV emails.
+        all_emails = base_allowed_snapshot | set(workbench_data.keys())
+
+        # Reuse the base merge logic by temporarily replacing ALLOWED_EMAILS.
+        # This avoids duplicating complex logic and keeps output formatting stable.
+        try:
+            if original_allowed is not None:
+                # Update in-place to retain reference used by base logic.
+                original_allowed.clear()
+                original_allowed.update(all_emails)
+            return super().merge_user_data(
+                github_data,
+                workbench_data,
+                date_range,
+                workbench_questions,
+            )
+        finally:
+            # Restore original allowed list to avoid side effects elsewhere.
+            if original_allowed is not None:
+                original_allowed.clear()
+                original_allowed.update(base_allowed_snapshot)
+
 
 def _month_token(month: Optional[str]) -> Optional[str]:
     """Return month token like 'Feb26' from YYYY-MM, or None if invalid."""
