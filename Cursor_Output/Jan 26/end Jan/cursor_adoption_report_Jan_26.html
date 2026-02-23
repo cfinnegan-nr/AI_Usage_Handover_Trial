@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursor AI Adoption Report</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .timestamp {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+            font-size: 1.1em;
+        }
+        .summary {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .summary h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label {
+            font-size: 0.95em;
+            color: #7f8c8d;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        .section-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 30px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #667eea;
+        }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover {
+            opacity: 0.9;
+        }
+        th.sortable::after {
+            content: ' ⇅';
+            opacity: 0.5;
+            font-size: 0.7em;
+        }
+        th.sort-asc::after {
+            content: ' ▲';
+            opacity: 1;
+            font-size: 0.7em;
+        }
+        th.sort-desc::after {
+            content: ' ▼';
+            opacity: 1;
+            font-size: 0.7em;
+        }
+        .sort-info {
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #e8f4fd 0%, #d1e7f0 100%);
+            border-radius: 8px;
+            font-size: 0.95em;
+            color: #2c3e50;
+        }
+        td:first-child {
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #e8f4fd;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .table-container table {
+            position: relative;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cursor AI Adoption Report</h1>
+        <div class="timestamp">Generated on 2026-02-03 17:35:06</div>
+        <div class="timestamp">Report Period: 2026-01-05 to 2026-02-03</div>
+        
+        <div class="summary">
+            <h2>Summary Metrics</h2>
+            
+            <div class="section-title">Overall Adoption</div>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-number">57</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">57</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100.0%</div>
+                    <div class="stat-label">Adoption Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15,623</div>
+                    <div class="stat-label">Total Requests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$5,872.14</div>
+                    <div class="stat-label">Total Cost</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">9,450</div>
+                    <div class="stat-label">Agent Completions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">475,116</div>
+                    <div class="stat-label">Total AI Lines</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">524</div>
+                    <div class="stat-label">Total Active Days</div>
+                </div>
+            </div>
+            
+            <div class="section-title">
+                <span style="font-size: 1.8em; margin-right: 10px;">📊</span>Chapter Breakdown
+            </div>
+            <div class="summary-stats">
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>AI</strong></div>
+                    <div class="stat-label">Users: 6/6</div>
+                    <div class="stat-label">Avg Requests: 345.33</div>
+                    <div class="stat-label">Threshold: 1000.0 (34.5%)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>Architecture</strong></div>
+                    <div class="stat-label">Users: 5/5</div>
+                    <div class="stat-label">Avg Requests: 113.60</div>
+                    <div class="stat-label">Threshold: 400.0 (28.4%)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>BE</strong></div>
+                    <div class="stat-label">Users: 23/23</div>
+                    <div class="stat-label">Avg Requests: 389.00</div>
+                    <div class="stat-label">Threshold: 1000.0 (38.9%)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>CE</strong></div>
+                    <div class="stat-label">Users: 3/3</div>
+                    <div class="stat-label">Avg Requests: 67.67</div>
+                    <div class="stat-label">Threshold: 400.0 (16.9%)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>Delivery</strong></div>
+                    <div class="stat-label">Users: 1/1</div>
+                    <div class="stat-label">Avg Requests: 82.00</div>
+                    <div class="stat-label">Threshold: 400.0 (20.5%)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>DevOps</strong></div>
+                    <div class="stat-label">Users: 1/1</div>
+                    <div class="stat-label">Avg Requests: 130.00</div>
+                    <div class="stat-label">Threshold: 400.0 (32.5%)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>ET</strong></div>
+                    <div class="stat-label">Users: 4/4</div>
+                    <div class="stat-label">Avg Requests: 161.25</div>
+                    <div class="stat-label">Threshold: 1000.0 (16.1%)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>FE</strong></div>
+                    <div class="stat-label">Users: 5/5</div>
+                    <div class="stat-label">Avg Requests: 62.60</div>
+                    <div class="stat-label">Threshold: 1000.0 (6.3%)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>QA</strong></div>
+                    <div class="stat-label">Users: 6/6</div>
+                    <div class="stat-label">Avg Requests: 385.83</div>
+                    <div class="stat-label">Threshold: 400.0 (96.5%)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #e74c3c;">✗</div>
+                    <div class="stat-label"><strong>SE</strong></div>
+                    <div class="stat-label">Users: 3/3</div>
+                    <div class="stat-label">Avg Requests: 116.00</div>
+                    <div class="stat-label">Threshold: 400.0 (29.0%)</div>
+                </div>
+
+            </div>
+        </div>
+        
+        <h2>Data Visualizations</h2>
+
+        <div class="chart-container">
+            <div class="chart-title">Note: Daily adoption data requires timestamp-level analysis</div>
+        </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Model Usage Distribution</div>
+                <div id="chart3"></div>
+            </div>
+            <script>
+                Plotly.newPlot('chart3', [{"hovertemplate": "<b>%{label}</b><br>Usage: %{value}<br>Percentage: %{percent}<extra></extra>", "labels": ["claude-4.5-sonnet-thinking", "claude-4.5-opus-high-thinking", "gpt-5.2", "auto", "gpt-5.2-xhigh", "agent_review", "gpt-5.2-codex", "gemini-3-flash-preview", "gemini-3-pro-preview", "gpt-5.1-codex-max", "composer-1", "gpt-5.2-high", "gpt-5.2-codex-high", "gpt-5.1-codex-mini", "grok-code-fast-1", "gpt-5.1-codex-mini-high", "claude-4.5-sonnet", "claude-4.5-opus-high", "claude-4.5-haiku-thinking"], "values": [6326, 2476, 409, 2140, 14, 70, 1110, 205, 129, 1, 1277, 103, 571, 150, 21, 1, 94, 27, 499], "type": "pie"}], {"template": {"data": {"barpolar": [{"marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "choropleth": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "choropleth"}], "contourcarpet": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "contourcarpet"}], "contour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "contour"}], "heatmap": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "heatmap"}], "histogram2dcontour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2dcontour"}], "histogram2d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2d"}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "mesh3d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "mesh3d"}], "parcoords": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "parcoords"}], "pie": [{"automargin": true, "type": "pie"}], "scatter3d": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatter3d"}], "scattercarpet": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattercarpet"}], "scattergeo": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergeo"}], "scattergl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergl"}], "scattermapbox": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermapbox"}], "scattermap": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermap"}], "scatterpolargl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolargl"}], "scatterpolar": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolar"}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "scatterternary": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterternary"}], "surface": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "surface"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}]}, "layout": {"annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "autotypenumbers": "strict", "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]], "sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}, "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "geo": {"bgcolor": "white", "lakecolor": "white", "landcolor": "white", "showlakes": true, "showland": true, "subunitcolor": "#C8D4E3"}, "hoverlabel": {"align": "left"}, "hovermode": "closest", "mapbox": {"style": "light"}, "paper_bgcolor": "white", "plot_bgcolor": "white", "polar": {"angularaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}, "bgcolor": "white", "radialaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}}, "scene": {"xaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "yaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "zaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "ternary": {"aaxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "baxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "bgcolor": "white", "caxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}}, "title": {"x": 0.05}, "xaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}, "yaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}}}, "title": {"text": "Model Usage Distribution"}, "height": 500});
+            </script>
+
+        <div class="chart-container">
+            <div class="chart-title">Cost Analysis by Chapter</div>
+            <div id="chart4"></div>
+        </div>
+        <script>
+            Plotly.newPlot('chart4', [{"hovertemplate": "<b>%{x}</b><br>Cost: $%{y:,.2f}<extra></extra>", "marker": {"color": ["#27ae60", "#e74c3c", "#27ae60", "#e74c3c", "#e74c3c", "#27ae60", "#27ae60", "#e74c3c", "#27ae60", "#e74c3c"]}, "x": ["AI", "Architecture", "BE", "CE", "Delivery", "DevOps", "ET", "FE", "QA", "SE"], "y": [923.33, 97.35, 3306.2599999999998, 49.77, 13.79, 177.1, 513.27, 51.04, 688.6999999999999, 51.53], "type": "bar"}], {"template": {"data": {"barpolar": [{"marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "choropleth": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "choropleth"}], "contourcarpet": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "contourcarpet"}], "contour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "contour"}], "heatmap": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "heatmap"}], "histogram2dcontour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2dcontour"}], "histogram2d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2d"}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "mesh3d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "mesh3d"}], "parcoords": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "parcoords"}], "pie": [{"automargin": true, "type": "pie"}], "scatter3d": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatter3d"}], "scattercarpet": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattercarpet"}], "scattergeo": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergeo"}], "scattergl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergl"}], "scattermapbox": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermapbox"}], "scattermap": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermap"}], "scatterpolargl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolargl"}], "scatterpolar": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolar"}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "scatterternary": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterternary"}], "surface": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "surface"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}]}, "layout": {"annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "autotypenumbers": "strict", "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]], "sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}, "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "geo": {"bgcolor": "white", "lakecolor": "white", "landcolor": "white", "showlakes": true, "showland": true, "subunitcolor": "#C8D4E3"}, "hoverlabel": {"align": "left"}, "hovermode": "closest", "mapbox": {"style": "light"}, "paper_bgcolor": "white", "plot_bgcolor": "white", "polar": {"angularaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}, "bgcolor": "white", "radialaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}}, "scene": {"xaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "yaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "zaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "ternary": {"aaxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "baxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "bgcolor": "white", "caxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}}, "title": {"x": 0.05}, "xaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}, "yaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}}}, "title": {"text": "Cost Analysis by Chapter"}, "xaxis": {"title": {"text": "Chapter"}}, "yaxis": {"title": {"text": "Total Cost ($)"}}, "height": 500});
+        </script>
+
+        <div class="chart-container">
+            <div class="chart-title">AI Lines Generated by Chapter</div>
+            <div id="chart5"></div>
+        </div>
+        <script>
+            Plotly.newPlot('chart5', [{"hovertemplate": "<b>%{x}</b><br>AI Lines: %{y:,}<extra></extra>", "marker": {"color": "#3498db"}, "x": ["AI", "Architecture", "BE", "CE", "Delivery", "DevOps", "ET", "FE", "QA", "SE"], "y": [117955, 19981, 221917, 2402, 7637, 15982, 44396, 2714, 35654, 6478], "type": "bar"}], {"template": {"data": {"barpolar": [{"marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "choropleth": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "choropleth"}], "contourcarpet": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "contourcarpet"}], "contour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "contour"}], "heatmap": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "heatmap"}], "histogram2dcontour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2dcontour"}], "histogram2d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2d"}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "mesh3d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "mesh3d"}], "parcoords": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "parcoords"}], "pie": [{"automargin": true, "type": "pie"}], "scatter3d": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatter3d"}], "scattercarpet": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattercarpet"}], "scattergeo": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergeo"}], "scattergl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergl"}], "scattermapbox": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermapbox"}], "scattermap": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermap"}], "scatterpolargl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolargl"}], "scatterpolar": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolar"}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "scatterternary": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterternary"}], "surface": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "surface"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}]}, "layout": {"annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "autotypenumbers": "strict", "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]], "sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}, "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "geo": {"bgcolor": "white", "lakecolor": "white", "landcolor": "white", "showlakes": true, "showland": true, "subunitcolor": "#C8D4E3"}, "hoverlabel": {"align": "left"}, "hovermode": "closest", "mapbox": {"style": "light"}, "paper_bgcolor": "white", "plot_bgcolor": "white", "polar": {"angularaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}, "bgcolor": "white", "radialaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}}, "scene": {"xaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "yaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "zaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "ternary": {"aaxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "baxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "bgcolor": "white", "caxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}}, "title": {"x": 0.05}, "xaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}, "yaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}}}, "title": {"text": "AI Lines Generated by Chapter"}, "xaxis": {"title": {"text": "Chapter"}}, "yaxis": {"title": {"text": "Total AI Lines"}}, "height": 500});
+        </script>
+
+        <div class="chart-container">
+            <div class="chart-title">Total Requests Threshold Analysis - Average per Chapter (Green = Above Threshold, Red = Below Threshold)</div>
+            <div id="chart6"></div>
+        </div>
+        <script>
+            Plotly.newPlot('chart6', [{"customdata": [1000.0, 400.0, 1000.0, 400.0, 400.0, 400.0, 1000.0, 1000.0, 400.0, 400.0], "hovertemplate": "<b>%{x}</b><br>Avg Requests: %{y:.2f}<br>Threshold: %{{customdata}}<br>Gap: %{{text:.2f}}<extra></extra>", "marker": {"color": ["#e74c3c", "#e74c3c", "#e74c3c", "#e74c3c", "#e74c3c", "#e74c3c", "#e74c3c", "#e74c3c", "#e74c3c", "#e74c3c"]}, "name": "Avg Requests", "text": ["-654.6700000000001", "-286.4", "-611.0", "-332.33", "-318.0", "-270.0", "-838.75", "-937.4", "-14.170000000000016", "-284.0"], "x": ["AI", "Architecture", "BE", "CE", "Delivery", "DevOps", "ET", "FE", "QA", "SE"], "y": [345.33, 113.6, 389.0, 67.67, 82.0, 130.0, 161.25, 62.6, 385.83, 116.0], "type": "bar"}, {"hovertemplate": "<b>%{x}</b><br>Threshold: %{y:,}<extra></extra>", "line": {"color": "orange", "dash": "dash", "width": 3}, "marker": {"size": 10}, "mode": "lines+markers", "name": "Threshold", "x": ["AI", "Architecture", "BE", "CE", "Delivery", "DevOps", "ET", "FE", "QA", "SE"], "y": [1000.0, 400.0, 1000.0, 400.0, 400.0, 400.0, 1000.0, 1000.0, 400.0, 400.0], "type": "scatter"}], {"template": {"data": {"barpolar": [{"marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "choropleth": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "choropleth"}], "contourcarpet": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "contourcarpet"}], "contour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "contour"}], "heatmap": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "heatmap"}], "histogram2dcontour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2dcontour"}], "histogram2d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2d"}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "mesh3d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "mesh3d"}], "parcoords": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "parcoords"}], "pie": [{"automargin": true, "type": "pie"}], "scatter3d": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatter3d"}], "scattercarpet": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattercarpet"}], "scattergeo": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergeo"}], "scattergl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergl"}], "scattermapbox": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermapbox"}], "scattermap": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermap"}], "scatterpolargl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolargl"}], "scatterpolar": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolar"}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "scatterternary": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterternary"}], "surface": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "surface"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}]}, "layout": {"annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "autotypenumbers": "strict", "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]], "sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}, "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "geo": {"bgcolor": "white", "lakecolor": "white", "landcolor": "white", "showlakes": true, "showland": true, "subunitcolor": "#C8D4E3"}, "hoverlabel": {"align": "left"}, "hovermode": "closest", "mapbox": {"style": "light"}, "paper_bgcolor": "white", "plot_bgcolor": "white", "polar": {"angularaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}, "bgcolor": "white", "radialaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}}, "scene": {"xaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "yaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "zaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "ternary": {"aaxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "baxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "bgcolor": "white", "caxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}}, "title": {"x": 0.05}, "xaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}, "yaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}}}, "title": {"text": "Total Requests Threshold Analysis (Average per Chapter)"}, "xaxis": {"title": {"text": "Chapter"}}, "yaxis": {"title": {"text": "Average Total Requests"}}, "height": 500, "hovermode": "x unified"});
+        </script>
+
+        <div class="chart-container">
+            <div class="chart-title">Chapter Threshold Performance (% of Target Achieved) - Based on Average Total Requests</div>
+            <div id="chart7"></div>
+        </div>
+        <script>
+            Plotly.newPlot('chart7', [{"customdata": [["Needs Improvement", 345.33], ["Needs Improvement", 113.6], ["Needs Improvement", 389.0], ["Needs Improvement", 67.67], ["Needs Improvement", 82.0], ["Needs Improvement", 130.0], ["Needs Improvement", 161.25], ["Needs Improvement", 62.6], ["Needs Improvement", 385.83], ["Needs Improvement", 116.0]], "hovertemplate": "<b>%{x}</b><br>Achievement: %{y:.1f}%<br>Status: %{customdata[0]}<br>Avg Requests: %{customdata[1]:.2f}<extra></extra>", "marker": {"color": ["#f39c12", "#f39c12", "#f39c12", "#f39c12", "#f39c12", "#f39c12", "#f39c12", "#f39c12", "#e74c3c", "#f39c12"]}, "x": ["AI", "Architecture", "BE", "CE", "Delivery", "DevOps", "ET", "FE", "QA", "SE"], "y": [34.532999999999994, 28.4, 38.9, 16.9175, 20.5, 32.5, 16.125, 6.260000000000001, 96.4575, 28.999999999999996], "type": "bar"}], {"template": {"data": {"barpolar": [{"marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "choropleth": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "choropleth"}], "contourcarpet": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "contourcarpet"}], "contour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "contour"}], "heatmap": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "heatmap"}], "histogram2dcontour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2dcontour"}], "histogram2d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2d"}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "mesh3d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "mesh3d"}], "parcoords": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "parcoords"}], "pie": [{"automargin": true, "type": "pie"}], "scatter3d": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatter3d"}], "scattercarpet": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattercarpet"}], "scattergeo": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergeo"}], "scattergl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergl"}], "scattermapbox": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermapbox"}], "scattermap": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermap"}], "scatterpolargl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolargl"}], "scatterpolar": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolar"}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "scatterternary": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterternary"}], "surface": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "surface"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}]}, "layout": {"annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "autotypenumbers": "strict", "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]], "sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}, "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "geo": {"bgcolor": "white", "lakecolor": "white", "landcolor": "white", "showlakes": true, "showland": true, "subunitcolor": "#C8D4E3"}, "hoverlabel": {"align": "left"}, "hovermode": "closest", "mapbox": {"style": "light"}, "paper_bgcolor": "white", "plot_bgcolor": "white", "polar": {"angularaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}, "bgcolor": "white", "radialaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}}, "scene": {"xaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "yaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "zaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "ternary": {"aaxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "baxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "bgcolor": "white", "caxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}}, "title": {"x": 0.05}, "xaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}, "yaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}}}, "shapes": [{"line": {"color": "orange", "dash": "dash"}, "type": "line", "x0": 0, "x1": 1, "xref": "x domain", "y0": 100, "y1": 100, "yref": "y"}], "annotations": [{"showarrow": false, "text": "100% Target", "x": 1, "xanchor": "left", "xref": "x domain", "y": 100, "yanchor": "middle", "yref": "y"}], "title": {"text": "Chapter Threshold Performance (% of Target Achieved) - Based on Average Total Requests"}, "xaxis": {"title": {"text": "Chapter"}}, "yaxis": {"title": {"text": "Percentage of Threshold Achieved (%)"}}, "height": 500});
+        </script>
+
+            <div class="chart-container">
+                <div class="chart-title">AI Impact Percentage - Hub & FS Repositories (By Individual Repo)</div>
+                <div id="chart10"></div>
+            </div>
+            <script>
+                Plotly.newPlot('chart10', [{"hovertemplate": "<b>%{{y}}</b><br>AI Impact: %{{x:.2f}}%<extra></extra>", "marker": {"color": "#9b59b6"}, "orientation": "h", "text": ["100.00%", "100.00%", "84.08%", "81.82%", "76.79%", "76.39%", "48.85%", "47.68%", "44.35%", "25.48%", "18.47%", "17.07%", "14.16%", "13.41%", "3.67%", "3.31%", "1.79%", "1.07%", "0.34%"], "textposition": "auto", "x": [100.0, 100.0, 84.08, 81.82, 76.79, 76.39, 48.85, 47.68, 44.35, 25.48, 18.47, 17.07, 14.16, 13.41, 3.67, 3.31, 1.79, 1.07, 0.34], "y": ["timeli/data_exploration_hub", "nr/distributed-builder", "SymphonySensa/invhub-disc-api", "SymphonySensa/dethub-ext-api", "SymphonySensa/dethub-core-db", "SymphonySensa/dethub-core-api", "Skillsbox/Skillsbox.Blazor.HubAndGrid", "fs-symphonyai/fsai/sensa-ai-assistant", "SymphonySensa/dethub-engine-inline", "SymphonySensa/dethub-qa-automation", "fs-symphonyai/fsai/sensa-aml", "fs-symphonyai/fsai/sensa-llm-api", "SymphonySensa/emtech-copilot-assembly", "SymphonySensa/dethub-engine-bulk", "SymphonySensa/invhub-performance-aqa", "fs-symphonyai/fsai/sensa-aml-api", "SymphonySensa/invhub-helm", "SymphonySensa/invhub-api", "SymphonySensa/invhub-qa-automation-framework"], "type": "bar"}], {"template": {"data": {"barpolar": [{"marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "choropleth": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "choropleth"}], "contourcarpet": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "contourcarpet"}], "contour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "contour"}], "heatmap": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "heatmap"}], "histogram2dcontour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2dcontour"}], "histogram2d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2d"}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "mesh3d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "mesh3d"}], "parcoords": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "parcoords"}], "pie": [{"automargin": true, "type": "pie"}], "scatter3d": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatter3d"}], "scattercarpet": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattercarpet"}], "scattergeo": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergeo"}], "scattergl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergl"}], "scattermapbox": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermapbox"}], "scattermap": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermap"}], "scatterpolargl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolargl"}], "scatterpolar": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolar"}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "scatterternary": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterternary"}], "surface": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "surface"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}]}, "layout": {"annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "autotypenumbers": "strict", "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]], "sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}, "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "geo": {"bgcolor": "white", "lakecolor": "white", "landcolor": "white", "showlakes": true, "showland": true, "subunitcolor": "#C8D4E3"}, "hoverlabel": {"align": "left"}, "hovermode": "closest", "mapbox": {"style": "light"}, "paper_bgcolor": "white", "plot_bgcolor": "white", "polar": {"angularaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}, "bgcolor": "white", "radialaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}}, "scene": {"xaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "yaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "zaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "ternary": {"aaxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "baxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "bgcolor": "white", "caxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}}, "title": {"x": 0.05}, "xaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}, "yaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}}}, "title": {"text": "AI Impact Percentage - Hub & FS Repositories (By Individual Repo)"}, "xaxis": {"title": {"text": "AI Impact Percentage (%)"}}, "yaxis": {"title": {"text": "Repository"}}, "height": 570});
+            </script>
+
+        <div class="chart-container">
+            <div class="chart-title">Top 10 Users by Total Activity</div>
+            <div id="chart8"></div>
+        </div>
+        <script>
+            Plotly.newPlot('chart8', [{"hovertemplate": "<b>%{y}</b><br>Total Requests: %{x:,}<extra></extra>", "marker": {"color": "#667eea"}, "orientation": "h", "x": [549, 686, 711, 712, 878, 906, 948, 1146, 1344, 1805], "y": ["jedrzej.rybczynski", "mikolaj.wegner", "lukasz.sobczuk", "isaac.downs", "ashish.nimoda", "hasan.hur", "ahmet.akkus", "grzegorz.plociennik", "damian.lowe", "muhammad.fayyaz"], "type": "bar"}], {"template": {"data": {"barpolar": [{"marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "white", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "#C8D4E3", "linecolor": "#C8D4E3", "minorgridcolor": "#C8D4E3", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "choropleth": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "choropleth"}], "contourcarpet": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "contourcarpet"}], "contour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "contour"}], "heatmap": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "heatmap"}], "histogram2dcontour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2dcontour"}], "histogram2d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "histogram2d"}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "mesh3d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "mesh3d"}], "parcoords": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "parcoords"}], "pie": [{"automargin": true, "type": "pie"}], "scatter3d": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatter3d"}], "scattercarpet": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattercarpet"}], "scattergeo": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergeo"}], "scattergl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergl"}], "scattermapbox": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermapbox"}], "scattermap": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermap"}], "scatterpolargl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolargl"}], "scatterpolar": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolar"}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "scatterternary": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterternary"}], "surface": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "type": "surface"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}]}, "layout": {"annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "autotypenumbers": "strict", "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]], "sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}, "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "geo": {"bgcolor": "white", "lakecolor": "white", "landcolor": "white", "showlakes": true, "showland": true, "subunitcolor": "#C8D4E3"}, "hoverlabel": {"align": "left"}, "hovermode": "closest", "mapbox": {"style": "light"}, "paper_bgcolor": "white", "plot_bgcolor": "white", "polar": {"angularaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}, "bgcolor": "white", "radialaxis": {"gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": ""}}, "scene": {"xaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "yaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}, "zaxis": {"backgroundcolor": "white", "gridcolor": "#DFE8F3", "gridwidth": 2, "linecolor": "#EBF0F8", "showbackground": true, "ticks": "", "zerolinecolor": "#EBF0F8"}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "ternary": {"aaxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "baxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}, "bgcolor": "white", "caxis": {"gridcolor": "#DFE8F3", "linecolor": "#A2B1C6", "ticks": ""}}, "title": {"x": 0.05}, "xaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}, "yaxis": {"automargin": true, "gridcolor": "#EBF0F8", "linecolor": "#EBF0F8", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#EBF0F8", "zerolinewidth": 2}}}, "title": {"text": "Top 10 Users by Total Requests"}, "xaxis": {"title": {"text": "Total Requests"}}, "yaxis": {"title": {"text": "User"}}, "height": 500});
+        </script>
+
+        <h2>Individual User Statistics</h2>
+        <div class="sort-info">
+            <strong>Filter by Chapter:</strong>
+            <select id="chapterFilter" style="padding: 8px; margin: 0 10px; border-radius: 6px; border: 2px solid #667eea; min-width: 150px; font-size: 1em;">
+                <option value="">All Chapters</option>
+            </select>
+            <span id="filterDisplay" style="margin-left: 10px; font-style: italic; color: #7f8c8d;"></span>
+            <br><br>
+            <strong>Sort Info:</strong> Click on column headers to sort. Hold Shift and click additional headers for multi-column sort. Current sort: <span id="sortDisplay">Default (by Active Days descending)</span>
+        </div>
+        <div class="table-container">
+            
+            <table id="adoptionTable">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Chapter</th>
+                        <th>Current Squad</th>
+                        <th>Name</th>
+                        <th>Total Requests</th>
+                        <th>Active Days</th>
+                        <th>Total Cost ($)</th>
+                        <th>Agent Completions</th>
+                        <th>Agent Lines</th>
+                        <th>Tab Completions</th>
+                        <th>Tab Lines</th>
+                        <th>Total AI Lines</th>
+                        <th>Favorite Model</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td>krystian.smolski@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>krystian.smolski</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>$0.00</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>5</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td>michal.sobkowiak@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td>michal.sobkowiak</td>
+                        <td>130</td>
+                        <td>9</td>
+                        <td>$35.25</td>
+                        <td>72</td>
+                        <td>2,095</td>
+                        <td>17</td>
+                        <td>47</td>
+                        <td>2,142</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>piotr.bartkowiak@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td>piotr.bartkowiak</td>
+                        <td>83</td>
+                        <td>8</td>
+                        <td>$11.10</td>
+                        <td>35</td>
+                        <td>1,205</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1,205</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>ahmet.akkus@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>Disclosures</td>
+                        <td>ahmet.akkus</td>
+                        <td>948</td>
+                        <td>16</td>
+                        <td>$555.83</td>
+                        <td>1,400</td>
+                        <td>39,149</td>
+                        <td>1,688</td>
+                        <td>3,618</td>
+                        <td>42,767</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>sugandan.sa@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>sugandan.sa</td>
+                        <td>191</td>
+                        <td>9</td>
+                        <td>$111.99</td>
+                        <td>29</td>
+                        <td>1,917</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1,917</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>ewa.chojnacka@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>ewa.chojnacka</td>
+                        <td>55</td>
+                        <td>5</td>
+                        <td>$5.86</td>
+                        <td>40</td>
+                        <td>440</td>
+                        <td>27</td>
+                        <td>53</td>
+                        <td>493</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>sarah.price@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub (Secondment to Visa)</td>
+                        <td>sarah.price</td>
+                        <td>236</td>
+                        <td>8</td>
+                        <td>$72.46</td>
+                        <td>71</td>
+                        <td>4,789</td>
+                        <td>3</td>
+                        <td>6</td>
+                        <td>4,795</td>
+                        <td>composer-1</td>
+                    </tr>
+
+                    <tr>
+                        <td>paul.nolan@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>NR</td>
+                        <td>paul.nolan</td>
+                        <td>22</td>
+                        <td>3</td>
+                        <td>$4.87</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>muhammad.fayyaz@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - WLM</td>
+                        <td>muhammad.fayyaz</td>
+                        <td>1,805</td>
+                        <td>22</td>
+                        <td>$773.49</td>
+                        <td>79</td>
+                        <td>9,717</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>9,717</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>lukasz.konieczka@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td>lukasz.konieczka</td>
+                        <td>96</td>
+                        <td>10</td>
+                        <td>$9.96</td>
+                        <td>56</td>
+                        <td>1,483</td>
+                        <td>2</td>
+                        <td>4</td>
+                        <td>1,487</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>ashok.manayangath@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - WLM</td>
+                        <td>ashok.manayangath</td>
+                        <td>40</td>
+                        <td>5</td>
+                        <td>$22.79</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>claude-4.5-opus-high-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>jan.kemnitz@symphonyai.com</td>
+                        <td>SE</td>
+                        <td>SE</td>
+                        <td>jan.kemnitz</td>
+                        <td>169</td>
+                        <td>11</td>
+                        <td>$30.47</td>
+                        <td>138</td>
+                        <td>3,390</td>
+                        <td>191</td>
+                        <td>396</td>
+                        <td>3,786</td>
+                        <td>gemini-3-flash-preview</td>
+                    </tr>
+
+                    <tr>
+                        <td>aashish.shirvastava@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>Disclosures</td>
+                        <td>aashish.shirvastava</td>
+                        <td>458</td>
+                        <td>18</td>
+                        <td>$112.28</td>
+                        <td>391</td>
+                        <td>23,362</td>
+                        <td>15</td>
+                        <td>26</td>
+                        <td>23,388</td>
+                        <td>composer-1</td>
+                    </tr>
+
+                    <tr>
+                        <td>mikolaj.wegner@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td>mikolaj.wegner</td>
+                        <td>686</td>
+                        <td>19</td>
+                        <td>$311.98</td>
+                        <td>658</td>
+                        <td>55,524</td>
+                        <td>75</td>
+                        <td>148</td>
+                        <td>55,672</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>szymon.urbanski@symphonyai.com</td>
+                        <td>DevOps</td>
+                        <td></td>
+                        <td>szymon.urbanski</td>
+                        <td>130</td>
+                        <td>9</td>
+                        <td>$177.10</td>
+                        <td>149</td>
+                        <td>15,973</td>
+                        <td>3</td>
+                        <td>9</td>
+                        <td>15,982</td>
+                        <td>claude-4.5-opus-high-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>samuel.pekala@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>NR</td>
+                        <td>samuel.pekala</td>
+                        <td>97</td>
+                        <td>9</td>
+                        <td>$17.69</td>
+                        <td>1</td>
+                        <td>646</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>646</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>tomasz.domasat@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td>tomasz.domasat</td>
+                        <td>276</td>
+                        <td>9</td>
+                        <td>$345.22</td>
+                        <td>224</td>
+                        <td>19,704</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>19,704</td>
+                        <td>gpt-5.2-high</td>
+                    </tr>
+
+                    <tr>
+                        <td>pekun.akinyede@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>pekun.akinyede</td>
+                        <td>92</td>
+                        <td>2</td>
+                        <td>$11.93</td>
+                        <td>10</td>
+                        <td>21</td>
+                        <td>2</td>
+                        <td>4</td>
+                        <td>25</td>
+                        <td>claude-4.5-opus-high-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>alec.cornelius@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - BasePlatform</td>
+                        <td>alec.cornelius</td>
+                        <td>24</td>
+                        <td>5</td>
+                        <td>$8.62</td>
+                        <td>45</td>
+                        <td>3,229</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>3,229</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>jonathan.hart@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>DataHub</td>
+                        <td>jonathan.hart</td>
+                        <td>379</td>
+                        <td>19</td>
+                        <td>$58.31</td>
+                        <td>377</td>
+                        <td>12,393</td>
+                        <td>49</td>
+                        <td>98</td>
+                        <td>12,491</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>krasymyr.tretiak@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td>krasymyr.tretiak</td>
+                        <td>538</td>
+                        <td>11</td>
+                        <td>$172.50</td>
+                        <td>469</td>
+                        <td>25,569</td>
+                        <td>13</td>
+                        <td>23</td>
+                        <td>25,592</td>
+                        <td>claude-4.5-opus-high-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>salini.k@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>DetHub</td>
+                        <td>salini.k</td>
+                        <td>193</td>
+                        <td>7</td>
+                        <td>$35.69</td>
+                        <td>49</td>
+                        <td>1,033</td>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>1,035</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>liam.horne@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub</td>
+                        <td>liam.horne</td>
+                        <td>100</td>
+                        <td>9</td>
+                        <td>$44.07</td>
+                        <td>38</td>
+                        <td>3,242</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>3,242</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>ajay.verma@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>Disclosures</td>
+                        <td>ajay.verma</td>
+                        <td>22</td>
+                        <td>4</td>
+                        <td>$3.53</td>
+                        <td>12</td>
+                        <td>267</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>267</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>pavansai.dasari@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td>pavansai.dasari</td>
+                        <td>137</td>
+                        <td>14</td>
+                        <td>$22.10</td>
+                        <td>84</td>
+                        <td>1,809</td>
+                        <td>20</td>
+                        <td>44</td>
+                        <td>1,853</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>olek.jacukowicz@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td>olek.jacukowicz</td>
+                        <td>48</td>
+                        <td>6</td>
+                        <td>$12.56</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>gpt-5.2-codex</td>
+                    </tr>
+
+                    <tr>
+                        <td>manikanta.reddy@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>InvHub</td>
+                        <td>manikanta.reddy</td>
+                        <td>297</td>
+                        <td>10</td>
+                        <td>$102.10</td>
+                        <td>25</td>
+                        <td>1,319</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1,319</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>grzegorz.plociennik@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>grzegorz.plociennik</td>
+                        <td>1,146</td>
+                        <td>20</td>
+                        <td>$711.03</td>
+                        <td>438</td>
+                        <td>29,781</td>
+                        <td>10</td>
+                        <td>20</td>
+                        <td>29,801</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>anurag.sharma@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>NR</td>
+                        <td>anurag.sharma</td>
+                        <td>49</td>
+                        <td>2</td>
+                        <td>$14.74</td>
+                        <td>116</td>
+                        <td>6,387</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>6,387</td>
+                        <td>composer-1</td>
+                    </tr>
+
+                    <tr>
+                        <td>hasan.hur@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DetHub</td>
+                        <td>hasan.hur</td>
+                        <td>906</td>
+                        <td>15</td>
+                        <td>$156.46</td>
+                        <td>1,483</td>
+                        <td>26,838</td>
+                        <td>311</td>
+                        <td>715</td>
+                        <td>27,553</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>manjot.sian@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub</td>
+                        <td>manjot.sian</td>
+                        <td>227</td>
+                        <td>11</td>
+                        <td>$71.89</td>
+                        <td>52</td>
+                        <td>5,801</td>
+                        <td>3</td>
+                        <td>5</td>
+                        <td>5,806</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>bartlomiej.niemienionek@symphonyai.com</td>
+                        <td>Architecture</td>
+                        <td>DetHub</td>
+                        <td>bartlomiej.niemienionek</td>
+                        <td>21</td>
+                        <td>4</td>
+                        <td>$1.74</td>
+                        <td>4</td>
+                        <td>457</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>457</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>ashish.nimoda@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>InvHub</td>
+                        <td>ashish.nimoda</td>
+                        <td>878</td>
+                        <td>10</td>
+                        <td>$300.13</td>
+                        <td>179</td>
+                        <td>28,013</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>28,013</td>
+                        <td>claude-4.5-opus-high-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>jahnavi.m@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>jahnavi.m</td>
+                        <td>18</td>
+                        <td>1</td>
+                        <td>$4.38</td>
+                        <td>22</td>
+                        <td>264</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>264</td>
+                        <td>gpt-5.2</td>
+                    </tr>
+
+                    <tr>
+                        <td>alan.duggan@symphonyai.com</td>
+                        <td>CE</td>
+                        <td>CE</td>
+                        <td>alan.duggan</td>
+                        <td>25</td>
+                        <td>2</td>
+                        <td>$1.96</td>
+                        <td>2</td>
+                        <td>260</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>260</td>
+                        <td>gpt-5.2</td>
+                    </tr>
+
+                    <tr>
+                        <td>isaac.downs@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub (Secondment to DetHub)</td>
+                        <td>isaac.downs</td>
+                        <td>712</td>
+                        <td>16</td>
+                        <td>$320.26</td>
+                        <td>1,039</td>
+                        <td>42,410</td>
+                        <td>9</td>
+                        <td>21</td>
+                        <td>42,431</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>michal.mendyk@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DetHub</td>
+                        <td>michal.mendyk</td>
+                        <td>53</td>
+                        <td>10</td>
+                        <td>$6.32</td>
+                        <td>35</td>
+                        <td>1,054</td>
+                        <td>4</td>
+                        <td>10</td>
+                        <td>1,064</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>wayne.vandeklee@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>wayne.vandeklee</td>
+                        <td>22</td>
+                        <td>5</td>
+                        <td>$3.69</td>
+                        <td>31</td>
+                        <td>467</td>
+                        <td>368</td>
+                        <td>885</td>
+                        <td>1,352</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>jakub.horyd@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>NR - WLM</td>
+                        <td>jakub.horyd</td>
+                        <td>14</td>
+                        <td>2</td>
+                        <td>$4.90</td>
+                        <td>15</td>
+                        <td>406</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>406</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>nilam.pathak@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>Disclosures</td>
+                        <td>nilam.pathak</td>
+                        <td>57</td>
+                        <td>8</td>
+                        <td>$19.34</td>
+                        <td>98</td>
+                        <td>2,760</td>
+                        <td>485</td>
+                        <td>1,107</td>
+                        <td>3,867</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>damian.lowe@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DataHub</td>
+                        <td>damian.lowe</td>
+                        <td>1,344</td>
+                        <td>16</td>
+                        <td>$174.11</td>
+                        <td>203</td>
+                        <td>13,861</td>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>13,863</td>
+                        <td>claude-4.5-haiku-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>divyaa.manimaran@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>divyaa.manimaran</td>
+                        <td>70</td>
+                        <td>5</td>
+                        <td>$10.24</td>
+                        <td>17</td>
+                        <td>214</td>
+                        <td>26</td>
+                        <td>44</td>
+                        <td>258</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>lewis.tipping@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td>lewis.tipping</td>
+                        <td>43</td>
+                        <td>10</td>
+                        <td>$9.20</td>
+                        <td>30</td>
+                        <td>2,142</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>2,142</td>
+                        <td>composer-1</td>
+                    </tr>
+
+                    <tr>
+                        <td>ciaran.finnegan@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>N/A</td>
+                        <td>ciaran.finnegan</td>
+                        <td>222</td>
+                        <td>8</td>
+                        <td>$15.49</td>
+                        <td>50</td>
+                        <td>3,523</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>3,523</td>
+                        <td>gpt-5.2-codex</td>
+                    </tr>
+
+                    <tr>
+                        <td>katarzyna.nowak@symphonyai.com</td>
+                        <td>FE</td>
+                        <td>InvHub</td>
+                        <td>katarzyna.nowak</td>
+                        <td>166</td>
+                        <td>8</td>
+                        <td>$31.25</td>
+                        <td>26</td>
+                        <td>598</td>
+                        <td>5</td>
+                        <td>8</td>
+                        <td>606</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>ksawery.baranowski@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DetHub</td>
+                        <td>ksawery.baranowski</td>
+                        <td>131</td>
+                        <td>8</td>
+                        <td>$16.06</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>gpt-5.2-codex-high</td>
+                    </tr>
+
+                    <tr>
+                        <td>mitali.arora@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td>mitali.arora</td>
+                        <td>43</td>
+                        <td>7</td>
+                        <td>$11.88</td>
+                        <td>174</td>
+                        <td>11,739</td>
+                        <td>4</td>
+                        <td>7</td>
+                        <td>11,746</td>
+                        <td>gpt-5.2-codex</td>
+                    </tr>
+
+                    <tr>
+                        <td>raj.puniyani@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td>raj.puniyani</td>
+                        <td>29</td>
+                        <td>1</td>
+                        <td>$15.31</td>
+                        <td>16</td>
+                        <td>158</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>158</td>
+                        <td>gpt-5.2-codex</td>
+                    </tr>
+
+                    <tr>
+                        <td>renata.kowalicka@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>InvHub</td>
+                        <td>renata.kowalicka</td>
+                        <td>358</td>
+                        <td>17</td>
+                        <td>$94.09</td>
+                        <td>124</td>
+                        <td>7,724</td>
+                        <td>25</td>
+                        <td>41</td>
+                        <td>7,765</td>
+                        <td>claude-4.5-sonnet-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>lukasz.sobczuk@symphonyai.com</td>
+                        <td>QA</td>
+                        <td>DetHub</td>
+                        <td>lukasz.sobczuk</td>
+                        <td>711</td>
+                        <td>10</td>
+                        <td>$230.39</td>
+                        <td>22</td>
+                        <td>1,352</td>
+                        <td>3</td>
+                        <td>6</td>
+                        <td>1,358</td>
+                        <td>gpt-5.2-codex-high</td>
+                    </tr>
+
+                    <tr>
+                        <td>anisha.agrahari@symphonyai.com</td>
+                        <td>ET</td>
+                        <td>AgentHub</td>
+                        <td>anisha.agrahari</td>
+                        <td>297</td>
+                        <td>12</td>
+                        <td>$140.86</td>
+                        <td>202</td>
+                        <td>12,778</td>
+                        <td>5</td>
+                        <td>10</td>
+                        <td>12,788</td>
+                        <td>claude-4.5-opus-high-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>attracta.byrne@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>DetHub</td>
+                        <td>attracta.byrne</td>
+                        <td>27</td>
+                        <td>4</td>
+                        <td>$2.56</td>
+                        <td>4</td>
+                        <td>130</td>
+                        <td>11</td>
+                        <td>22</td>
+                        <td>152</td>
+                        <td>gpt-5.2-codex</td>
+                    </tr>
+
+                    <tr>
+                        <td>jan.konupek@symphonyai.com</td>
+                        <td>Delivery</td>
+                        <td></td>
+                        <td>jan.konupek</td>
+                        <td>82</td>
+                        <td>10</td>
+                        <td>$13.79</td>
+                        <td>70</td>
+                        <td>7,477</td>
+                        <td>66</td>
+                        <td>160</td>
+                        <td>7,637</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>jedrzej.rybczynski@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td>jedrzej.rybczynski</td>
+                        <td>549</td>
+                        <td>25</td>
+                        <td>$299.27</td>
+                        <td>388</td>
+                        <td>22,135</td>
+                        <td>472</td>
+                        <td>1,162</td>
+                        <td>23,297</td>
+                        <td>claude-4.5-opus-high-thinking</td>
+                    </tr>
+
+                    <tr>
+                        <td>ethna.killeen@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - WLM</td>
+                        <td>ethna.killeen</td>
+                        <td>36</td>
+                        <td>3</td>
+                        <td>$3.73</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>2</td>
+                        <td>4</td>
+                        <td>4</td>
+                        <td>default</td>
+                    </tr>
+
+                    <tr>
+                        <td>kamil.reczek@symphonyai.com</td>
+                        <td>BE</td>
+                        <td>NR - WLM</td>
+                        <td>kamil.reczek</td>
+                        <td>16</td>
+                        <td>2</td>
+                        <td>$9.04</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>gpt-5.2-codex</td>
+                    </tr>
+
+                    <tr>
+                        <td>piotr.michalek@symphonyai.com</td>
+                        <td>AI</td>
+                        <td>AI</td>
+                        <td>piotr.michalek</td>
+                        <td>119</td>
+                        <td>15</td>
+                        <td>$108.28</td>
+                        <td>158</td>
+                        <td>9,108</td>
+                        <td>108</td>
+                        <td>291</td>
+                        <td>9,399</td>
+                        <td>default</td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    
+    <script>
+        class TableSorter {
+            constructor(tableId) {
+                this.table = document.getElementById(tableId);
+                this.tbody = this.table.querySelector('tbody');
+                this.headers = this.table.querySelectorAll('th');
+                this.sortState = [];
+                this.chapterFilter = '';
+                this.init();
+            }
+            
+            init() {
+                this.headers.forEach((header, index) => {
+                    header.classList.add('sortable');
+                    header.addEventListener('click', (e) => this.handleSort(e, index));
+                });
+                
+                this.populateChapterFilter();
+                
+                const chapterFilterSelect = document.getElementById('chapterFilter');
+                chapterFilterSelect.addEventListener('change', (e) => this.applyChapterFilter(e.target.value));
+                
+                // Default sort by active days descending
+                this.applyDefaultSort();
+            }
+            
+            populateChapterFilter() {
+                const rows = Array.from(this.tbody.querySelectorAll('tr'));
+                const chapters = new Set();
+                
+                rows.forEach(row => {
+                    const chapterCell = row.cells[1];
+                    const chapterText = chapterCell.textContent.trim();
+                    if (chapterText) {
+                        chapters.add(chapterText);
+                    }
+                });
+                
+                const sortedChapters = Array.from(chapters).sort();
+                const chapterFilterSelect = document.getElementById('chapterFilter');
+                sortedChapters.forEach(chapter => {
+                    const option = document.createElement('option');
+                    option.value = chapter;
+                    option.textContent = chapter;
+                    chapterFilterSelect.appendChild(option);
+                });
+            }
+            
+            applyChapterFilter(filterValue) {
+                this.chapterFilter = filterValue.trim();
+                const rows = Array.from(this.tbody.querySelectorAll('tr'));
+                let visibleCount = 0;
+                
+                rows.forEach(row => {
+                    const chapterCell = row.cells[1];
+                    const chapterText = chapterCell.textContent.trim();
+                    
+                    if (this.chapterFilter === '' || chapterText === this.chapterFilter) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                const filterDisplay = document.getElementById('filterDisplay');
+                if (this.chapterFilter === '') {
+                    filterDisplay.textContent = '';
+                } else {
+                    filterDisplay.textContent = `Showing ${visibleCount} of ${rows.length} users`;
+                }
+            }
+            
+            applyDefaultSort() {
+                this.sortState = [];
+                this.addSortColumn(5, 'desc'); // Active Days column
+                this.updateHeaders();
+                this.performSort();
+                this.updateSortDisplay('Active Days (descending)');
+            }
+            
+            handleSort(e, columnIndex) {
+                if (e.shiftKey) {
+                    const existingSort = this.sortState.find(s => s.column === columnIndex);
+                    if (existingSort) {
+                        existingSort.direction = existingSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        this.addSortColumn(columnIndex, 'asc');
+                    }
+                } else {
+                    const existingSort = this.sortState.find(s => s.column === columnIndex);
+                    const newDirection = existingSort && existingSort.direction === 'asc' ? 'desc' : 'asc';
+                    this.sortState = [];
+                    this.addSortColumn(columnIndex, newDirection);
+                }
+                
+                this.updateHeaders();
+                this.performSort();
+                this.updateSortDisplay();
+            }
+            
+            addSortColumn(columnIndex, direction) {
+                const existing = this.sortState.findIndex(s => s.column === columnIndex);
+                if (existing !== -1) {
+                    this.sortState[existing].direction = direction;
+                } else {
+                    this.sortState.push({ column: columnIndex, direction: direction });
+                }
+            }
+            
+            updateHeaders() {
+                this.headers.forEach((header, index) => {
+                    header.classList.remove('sort-asc', 'sort-desc');
+                    const sort = this.sortState.find(s => s.column === index);
+                    if (sort) {
+                        header.classList.add(sort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                    }
+                });
+            }
+            
+            performSort() {
+                const rows = Array.from(this.tbody.querySelectorAll('tr'));
+                
+                rows.sort((a, b) => {
+                    for (const sort of this.sortState) {
+                        const aCell = a.cells[sort.column].textContent.trim();
+                        const bCell = b.cells[sort.column].textContent.trim();
+                        
+                        const aNum = parseFloat(aCell.replace(/[^0-9.-]/g, ''));
+                        const bNum = parseFloat(bCell.replace(/[^0-9.-]/g, ''));
+                        
+                        let comparison = 0;
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            comparison = aNum - bNum;
+                        } else {
+                            comparison = aCell.localeCompare(bCell);
+                        }
+                        
+                        if (comparison !== 0) {
+                            return sort.direction === 'asc' ? comparison : -comparison;
+                        }
+                    }
+                    return 0;
+                });
+                
+                rows.forEach(row => this.tbody.appendChild(row));
+            }
+            
+            updateSortDisplay(customText) {
+                const sortDisplay = document.getElementById('sortDisplay');
+                if (customText) {
+                    sortDisplay.textContent = customText;
+                } else if (this.sortState.length === 0) {
+                    sortDisplay.textContent = 'Default (by Active Days descending)';
+                } else {
+                    const displayParts = this.sortState.map(s => {
+                        const header = this.headers[s.column].textContent.trim();
+                        const direction = s.direction === 'asc' ? '↑' : '↓';
+                        return header + ' ' + direction;
+                    });
+                    sortDisplay.textContent = displayParts.join(', ');
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            new TableSorter('adoptionTable');
+        });
+    </script>
+</body>
+</html>
