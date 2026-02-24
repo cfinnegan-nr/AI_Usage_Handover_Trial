@@ -371,7 +371,7 @@ def load_fs_repo_list(csv_path: str) -> Set[str]:
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row_num, row in enumerate(reader, 1):
-                repo_name = row.get('Repo Name', '').strip()
+                repo_name = row.get('Repo_Name', row.get('Repo Name', '')).strip()
                 if repo_name:
                     repo_names.add(repo_name.lower())
         print(f"Loaded {len(repo_names)} repository names from FS_Repo_List.csv")
