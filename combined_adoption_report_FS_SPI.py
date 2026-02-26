@@ -26,6 +26,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional, Tuple
 
 from combined_adoption_report import (
+    ALLOWED_EMAILS,
     CombinedAdoptionAnalyzer as BaseAnalyzer,
     constrain_date_range,
     derive_date_range,
@@ -121,6 +122,10 @@ class CombinedAdoptionAnalyzer(BaseAnalyzer):
         - Total Requests
 
         Activity date is set to the start of the report date_range (month start).
+
+        Only rows whose parsed email (derived from Subscription) appears in
+        useremails.csv (ALLOWED_EMAILS) are included. Rows with emails not in
+        the allowed list are skipped and counted in diagnostics.
         """
         print(f"Loading Workbench data from {file_path}...")
         print(
@@ -145,6 +150,7 @@ class CombinedAdoptionAnalyzer(BaseAnalyzer):
         processed_rows = 0
         skipped_invalid_email = 0
         skipped_missing_subscription = 0
+        skipped_not_in_useremails = 0
         missing_total_requests = 0
         total_api_requests = 0
         sample_emails = set()
@@ -190,6 +196,20 @@ class CombinedAdoptionAnalyzer(BaseAnalyzer):
                         )
                         if not email:
                             skipped_invalid_email += 1
+                            continue
+
+                        # Filter: only include rows whose parsed email is in useremails.csv.
+                        # This ensures Azure API CSV data is restricted to allowed users only.
+                        try:
+                            if email not in ALLOWED_EMAILS:
+                                skipped_not_in_useremails += 1
+                                continue
+                        except Exception as check_err:
+                            print(
+                                f"Warning: Error checking allowed emails on row {row_num}: "
+                                f"{check_err}. Skipping row."
+                            )
+                            skipped_not_in_useremails += 1
                             continue
 
                         # Extend row with derived email as requested
@@ -245,6 +265,9 @@ class CombinedAdoptionAnalyzer(BaseAnalyzer):
         print(f"  Rows processed: {processed_rows}")
         print(f"  Rows skipped (missing Subscription): {skipped_missing_subscription}")
         print(f"  Rows skipped (invalid email): {skipped_invalid_email}")
+        print(
+            f"  Rows skipped (email not in useremails.csv): {skipped_not_in_useremails}"
+        )
         print(f"  Rows with missing Total Requests: {missing_total_requests}")
         print(f"  Total API requests aggregated: {total_api_requests}")
         print(f"  Unique users with data: {len(user_data)}")
@@ -260,53 +283,6 @@ class CombinedAdoptionAnalyzer(BaseAnalyzer):
         print(f"  ============================================\n")
         print(f"Loaded Workbench data for {len(user_data)} users")
         return dict(user_data)
-
-    def merge_user_data(
-        self,
-        github_data: Dict[str, Dict],
-        workbench_data: Dict[str, Dict],
-        date_range: Tuple[datetime, datetime],
-        workbench_questions: Optional[Dict[str, int]] = None,
-    ) -> list[Dict[str, Any]]:
-        """
-        Merge GitHub and Workbench data, ensuring Azure CSV-only users are included.
-
-        The base implementation iterates only over ALLOWED_EMAILS, which can drop
-        Azure CSV users not present in useremails.csv. We include those users while
-        preserving the base merge behavior and metadata for allowed users.
-        """
-        # Use base logic but include any emails present in Azure CSV data.
-        # This preserves existing output format while preventing silent data loss.
-        # ALLOWED_EMAILS is defined in the base module; fall back to empty if unavailable.
-        try:
-            from combined_adoption_report import ALLOWED_EMAILS as original_allowed  # type: ignore
-        except Exception:
-            original_allowed = None
-
-        base_allowed_snapshot = set(original_allowed) if original_allowed else set()
-
-        # Create a combined allow list: all allowed users + any Azure CSV emails.
-        all_emails = base_allowed_snapshot | set(workbench_data.keys())
-
-        # Reuse the base merge logic by temporarily replacing ALLOWED_EMAILS.
-        # This avoids duplicating complex logic and keeps output formatting stable.
-        try:
-            if original_allowed is not None:
-                # Update in-place to retain reference used by base logic.
-                original_allowed.clear()
-                original_allowed.update(all_emails)
-            return super().merge_user_data(
-                github_data,
-                workbench_data,
-                date_range,
-                workbench_questions,
-            )
-        finally:
-            # Restore original allowed list to avoid side effects elsewhere.
-            if original_allowed is not None:
-                original_allowed.clear()
-                original_allowed.update(base_allowed_snapshot)
-
 
 def _month_token(month: Optional[str]) -> Optional[str]:
     """Return month token like 'Feb26' from YYYY-MM, or None if invalid."""
