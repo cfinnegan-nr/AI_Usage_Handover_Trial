@@ -13,6 +13,29 @@ from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Any, Optional
 
 
+def parse_usage_event_cost(value: Any) -> float:
+    """Parse Cost from team-usage-events CSV; use 0.0 when missing or invalid.
+
+    Cursor exports sometimes contain non-numeric Cost cells; those should not
+    skip the row or emit conversion warnings.
+    """
+    if value is None:
+        return 0.0
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return float(value)
+    s = str(value).strip()
+    if not s:
+        return 0.0
+    if s.startswith('$'):
+        s = s[1:].strip()
+    if not s:
+        return 0.0
+    try:
+        return float(s)
+    except (ValueError, TypeError):
+        return 0.0
+
+
 def find_newest_file_by_pattern(directory: str, pattern: str) -> Optional[str]:
     """Find the newest file in a directory that contains a pattern in its name.
     
@@ -188,7 +211,9 @@ def load_usage_events(csv_path: str, allowed_emails: Set[str],
                     # Aggregate metrics
                     try:
                         user_data[user_email]['total_requests'] += 1
-                        user_data[user_email]['total_cost'] += float(row.get('Cost', 0) or 0)
+                        user_data[user_email]['total_cost'] += parse_usage_event_cost(
+                            row.get('Cost')
+                        )
                         
                         # Input tokens (use "Input (w/ Cache Write)" as primary, fallback to "Input (w/o Cache Write)")
                         input_with_cache = int(row.get('Input (w/ Cache Write)', 0) or 0)

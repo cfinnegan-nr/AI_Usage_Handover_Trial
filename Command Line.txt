@@ -33,3 +33,9 @@ python combined_adoption_report.py --github-json github_copilot_metrics_jan_2026
 -- Feb 2026 - Final Run
 
 python combined_adoption_report_FS_SPI.py --github-json github_copilot_metrics_feb_2026_Month.json --azureAPIanalysis "FS API Subscriber Analytics - Feb26_Month.csv" --workbench-questions-csv "Workbench User Details - Feb26_Month.csv" --month 2026-02 --csv-output feb26_adoption_non_c.csv --html-output feb26_adoption_non_c.html
+
+
+
+-- Mar 2026 - Final Run
+
+python combined_adoption_report_FS_SPI.py --github-json github_copilot_metrics_Mar_2026_Month.json --azureAPIanalysis "FS API Subscriber Analytics - Mar26_Month.csv" --workbench-questions-csv "Workbench User Details - Mar26_Month.csv" --month 2026-03 --csv-output Mar26_adoption_non_c.csv --html-output Mar26_adoption_non_c.html
